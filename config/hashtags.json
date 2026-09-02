@@ -1,0 +1,30 @@
+{
+  "fixed": [
+    "#CNC", "#LaserCutting", "#LaserCutter", "#CNCProjects", "#CNCDesign",
+    "#CNCDesigns", "#DXF", "#DXFFiles", "#FreeDXF", "#LaserCuttingProjects",
+    "#PlasmaCutting", "#Woodworking", "#DIYProjects", "#Maker", "#DigitalFabrication",
+    "#CADDesign", "#CNCFiles", "#LaserProjects", "#FreeDesigns", "#Crafting",
+    "#DIY", "#Makers", "#Workshop", "#Metalworking"
+  ],
+  "always_last": "#MasterDXF",
+  "pool": [
+    "#LaserEngraving", "#LaserEngraver", "#LaserEngravingProjects", "#LaserCuttingBusiness",
+    "#LaserCuttingIdeas", "#LaserCuttingArt", "#LaserCuttingDesigns", "#LaserCuttingMachine",
+    "#LaserCuttingHobby", "#LaserCuttingDIY", "#LaserBusiness", "#LaserHobby", "#LaserArt",
+    "#LaserCraft", "#LaserMade", "#LaserProjectsIdeas", "#CNCMachining", "#CNCMachine",
+    "#CNCWoodworking", "#CNCRouter", "#CNCProgramming", "#CNCOperator", "#CNCMachiningProjects",
+    "#CNCHobbyist", "#CNCHobby", "#CNCWorkshop", "#CNCRouterProjects", "#CNCArt", "#CNCMetal",
+    "#CNCWood", "#PlasmaCutter", "#PlasmaCutterProjects", "#PlasmaCuttingDesigns",
+    "#PlasmaCuttingArt", "#PlasmaCuttingMachine", "#PlasmaCNC", "#MetalFabrication",
+    "#MetalFabricator", "#MetalFab", "#MetalworkingProjects", "#MetalArt", "#MetalDesign",
+    "#SteelFabrication", "#WeldingProjects", "#WeldingArt", "#WoodCraft", "#WoodCrafts",
+    "#WoodArt", "#WoodProjects", "#WoodDesign", "#WoodworkingProjects", "#WoodworkingIdeas",
+    "#WoodworkingTools", "#WoodShop", "#HomeWorkshop", "#HomeShop", "#HomeShopTools",
+    "#SmallWorkshop", "#SmallBusiness", "#MakerBusiness", "#MakerCommunity", "#MakerMovement",
+    "#MakeSomething", "#BuildSomething", "#HandmadeBusiness", "#CustomFabrication",
+    "#CustomMade", "#ProductDesign", "#3DDesign", "#3DModeling", "#3DDesignIdeas",
+    "#DigitalDesign", "#DesignForManufacturing", "#DIYTools", "#DIYCrafts", "#DIYIdeas",
+    "#DIYWorkshop", "#Engraving", "#EngravingIdeas", "#CustomEngraving", "#WoodEngraving",
+    "#CreativeWorkshop"
+  ]
+}
