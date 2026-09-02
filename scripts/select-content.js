@@ -1,9 +1,9 @@
 const fs = require('fs');
-const path = require('path');
 
 const GITHUB_USER = 'masterdxfcom-stack';
 const GITHUB_REPO = 'masterdxf-social-publisher';
 const GITHUB_BRANCH = 'main';
+const SITE_URL = 'https://masterdxf.com';
 
 function parseSitemap(xmlContent) {
   const designs = [];
@@ -51,20 +51,17 @@ function pickDesigns(allDesigns, tracker) {
   };
 }
 
-// ==== جديد: اختيار موسيقى عشوائية ====
 function pickRandomMusic() {
   const files = fs.readdirSync('music').filter(f => f.toLowerCase().endsWith('.mp3'));
   const chosen = files[Math.floor(Math.random() * files.length)];
   return `https://raw.githubusercontent.com/${GITHUB_USER}/${GITHUB_REPO}/${GITHUB_BRANCH}/music/${encodeURIComponent(chosen)}`;
 }
 
-// ==== جديد: اختيار وصف عشوائي ====
 function pickRandomDescription() {
   const descriptions = JSON.parse(fs.readFileSync('config/descriptions.json', 'utf8'));
   return descriptions[Math.floor(Math.random() * descriptions.length)];
 }
 
-// ==== جديد: بناء الهاشتاغ (ثابت + 4 عشوائي من المخزون) ====
 function buildHashtags() {
   const data = JSON.parse(fs.readFileSync('config/hashtags.json', 'utf8'));
   const pool = [...data.pool];
@@ -73,22 +70,62 @@ function buildHashtags() {
   return [...data.fixed, ...randomFour];
 }
 
+function withUtm(baseUrl, platform, content) {
+  const url = new URL(baseUrl);
+  url.searchParams.set('utm_source', platform);
+  url.searchParams.set('utm_medium', 'organic_social');
+  url.searchParams.set('utm_campaign', 'design_showcase');
+  url.searchParams.set('utm_content', content);
+  return url.toString();
+}
+
+function buildFullDescription(baseDescription, selectedDesigns, hashtags, platform) {
+  const siteLink = withUtm(SITE_URL, platform, 'site_link');
+  const designLinks = selectedDesigns
+    .map((d, i) => withUtm(d.page_url, platform, `design_${i + 1}`))
+    .join('\n');
+
+  return [
+    baseDescription,
+    '',
+    siteLink,
+    designLinks,
+    '',
+    hashtags.join(' ')
+  ].join('\n');
+}
+
 // ==== التشغيل ====
 const xml = fs.readFileSync('data/sitemap-images.xml', 'utf8');
 const allDesigns = parseSitemap(xml);
-console.log(`✅ تم استخراج ${allDesigns.length} تصميم من sitemap`);
 
 const tracker = JSON.parse(fs.readFileSync('data/design-tracker.json', 'utf8'));
 const result = pickDesigns(allDesigns, tracker);
 
-console.log('\n🎯 التصاميم المختارة:');
-result.selected.forEach((d, i) => console.log(`${i + 1}. ${d.title}`));
-
 const musicUrl = pickRandomMusic();
-console.log(`\n🎵 الموسيقى المختارة: ${musicUrl}`);
-
 const description = pickRandomDescription();
-console.log(`\n📝 الوصف المختار: ${description}`);
-
 const hashtags = buildHashtags();
-console.log(`\n#️⃣ الهاشتاغات (${hashtags.length}): ${hashtags.join(' ')}`);
+
+const description_facebook = buildFullDescription(description, result.selected, hashtags, 'facebook');
+const description_tiktok = buildFullDescription(description, result.selected, hashtags, 'tiktok');
+
+fs.writeFileSync('data/design-tracker.json', JSON.stringify(result.newTracker, null, 2));
+
+const finalOutput = {
+  images: result.selected.map(d => d.image_url),
+  music_url: musicUrl,
+  description_facebook,
+  description_tiktok
+};
+
+fs.writeFileSync('data/latest-output.json', JSON.stringify(finalOutput, null, 2));
+
+console.log('===== FACEBOOK DESCRIPTION =====');
+console.log(description_facebook);
+console.log('\n===== TIKTOK DESCRIPTION =====');
+console.log(description_tiktok);
+console.log('\n===== IMAGES =====');
+console.log(finalOutput.images.join('\n'));
+console.log('\n===== MUSIC =====');
+console.log(musicUrl);
+console.log(`\n📦 تبقى بالمخزون: ${result.newTracker.remaining.length} تصميم`);
