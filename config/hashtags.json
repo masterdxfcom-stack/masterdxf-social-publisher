@@ -1,13 +1,10 @@
 {
-  "fixed": [
-    "#CNC", "#LaserCutting", "#LaserCutter", "#CNCProjects", "#CNCDesign",
-    "#CNCDesigns", "#DXF", "#DXFFiles", "#FreeDXF", "#LaserCuttingProjects",
-    "#PlasmaCutting", "#Woodworking", "#DIYProjects", "#Maker", "#DigitalFabrication",
-    "#CADDesign", "#CNCFiles", "#LaserProjects", "#FreeDesigns", "#Crafting",
-    "#DIY", "#Makers", "#Workshop", "#Metalworking"
-  ],
-  "always_last": "#MasterDXF",
+  "fixed": ["#DXF", "#CNC", "#LaserCutting", "#FreeDXF", "#MasterDXF"],
   "pool": [
+    "#LaserCutter", "#CNCProjects", "#CNCDesign", "#CNCDesigns", "#DXFFiles",
+    "#LaserCuttingProjects", "#PlasmaCutting", "#Woodworking", "#DIYProjects", "#Maker",
+    "#DigitalFabrication", "#CADDesign", "#CNCFiles", "#LaserProjects", "#FreeDesigns",
+    "#Crafting", "#DIY", "#Makers", "#Workshop", "#Metalworking",
     "#LaserEngraving", "#LaserEngraver", "#LaserEngravingProjects", "#LaserCuttingBusiness",
     "#LaserCuttingIdeas", "#LaserCuttingArt", "#LaserCuttingDesigns", "#LaserCuttingMachine",
     "#LaserCuttingHobby", "#LaserCuttingDIY", "#LaserBusiness", "#LaserHobby", "#LaserArt",
