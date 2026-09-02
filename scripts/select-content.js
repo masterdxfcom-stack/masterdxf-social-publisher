@@ -31,23 +31,37 @@ function shuffleArray(arr) {
 }
 
 function pickDesigns(allDesigns, tracker) {
-  let remaining = tracker.remaining;
-  if (!remaining || remaining.length === 0) {
-    remaining = allDesigns.map(d => d.page_url);
+  const allUrls = allDesigns.map(d => d.page_url);
+  let remaining = tracker.remaining || [];
+  let used = tracker.used || [];
+
+  const knownUrls = new Set([...remaining, ...used]);
+  const newUrls = allUrls.filter(url => !knownUrls.has(url));
+  if (newUrls.length > 0) {
+    shuffleArray(newUrls);
+    remaining = [...newUrls, ...remaining];
+  }
+
+  const currentUrls = new Set(allUrls);
+  remaining = remaining.filter(url => currentUrls.has(url));
+  used = used.filter(url => currentUrls.has(url));
+
+  if (remaining.length === 0 && used.length > 0) {
+    remaining = used.slice();
     shuffleArray(remaining);
+    used = [];
   }
-  if (remaining.length < 5) {
-    const usedUrls = new Set(remaining);
-    const freshPool = allDesigns.map(d => d.page_url).filter(url => !usedUrls.has(url));
-    shuffleArray(freshPool);
-    remaining = remaining.concat(freshPool);
-  }
-  const selectedUrls = remaining.slice(0, 5);
-  const newRemaining = remaining.slice(5);
+
+  const count = Math.min(5, remaining.length);
+  const selectedUrls = remaining.slice(0, count);
+  const newRemaining = remaining.slice(count);
+  const newUsed = [...used, ...selectedUrls];
+
   const selectedDesigns = selectedUrls.map(url => allDesigns.find(d => d.page_url === url));
+
   return {
     selected: selectedDesigns,
-    newTracker: { remaining: newRemaining, last_updated: new Date().toISOString() }
+    newTracker: { remaining: newRemaining, used: newUsed, last_updated: new Date().toISOString() }
   };
 }
 
@@ -84,15 +98,7 @@ function buildFullDescription(baseDescription, selectedDesigns, hashtags, platfo
   const designLinks = selectedDesigns
     .map((d, i) => withUtm(d.page_url, platform, `design_${i + 1}`))
     .join('\n');
-
-  return [
-    baseDescription,
-    '',
-    siteLink,
-    designLinks,
-    '',
-    hashtags.join(' ')
-  ].join('\n');
+  return [baseDescription, '', siteLink, designLinks, '', hashtags.join(' ')].join('\n');
 }
 
 // ==== التشغيل ====
@@ -117,7 +123,6 @@ const finalOutput = {
   description_facebook,
   description_tiktok
 };
-
 fs.writeFileSync('data/latest-output.json', JSON.stringify(finalOutput, null, 2));
 
 console.log('===== FACEBOOK DESCRIPTION =====');
@@ -128,4 +133,4 @@ console.log('\n===== IMAGES =====');
 console.log(finalOutput.images.join('\n'));
 console.log('\n===== MUSIC =====');
 console.log(musicUrl);
-console.log(`\n📦 تبقى بالمخزون: ${result.newTracker.remaining.length} تصميم`);
+console.log(`\n📦 remaining: ${result.newTracker.remaining.length} | used: ${result.newTracker.used.length}`);
