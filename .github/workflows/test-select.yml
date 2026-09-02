@@ -2,6 +2,8 @@ name: Test Select Content
 
 on:
   workflow_dispatch:
+  repository_dispatch:
+    types: [run-publish]
 
 permissions:
   contents: write
