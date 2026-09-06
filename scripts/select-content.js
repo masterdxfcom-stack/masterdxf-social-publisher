@@ -65,10 +65,39 @@ function pickDesigns(allDesigns, tracker) {
   };
 }
 
-function pickRandomMusic() {
-  const files = fs.readdirSync('music').filter(f => f.toLowerCase().endsWith('.mp3'));
-  const chosen = files[Math.floor(Math.random() * files.length)];
-  return `https://raw.githubusercontent.com/${GITHUB_USER}/${GITHUB_REPO}/${GITHUB_BRANCH}/music/${encodeURIComponent(chosen)}`;
+// ==== جديد: اختيار موسيقى بدون تكرار (نفس منطق التصاميم بالضبط) ====
+function pickMusic(tracker) {
+  const allFilenames = fs.readdirSync('music').filter(f => f.toLowerCase().endsWith('.mp3'));
+  let remaining = tracker.remaining || [];
+  let used = tracker.used || [];
+
+  const knownFiles = new Set([...remaining, ...used]);
+  const newFiles = allFilenames.filter(f => !knownFiles.has(f));
+  if (newFiles.length > 0) {
+    shuffleArray(newFiles);
+    remaining = [...newFiles, ...remaining];
+  }
+
+  const currentFiles = new Set(allFilenames);
+  remaining = remaining.filter(f => currentFiles.has(f));
+  used = used.filter(f => currentFiles.has(f));
+
+  if (remaining.length === 0 && used.length > 0) {
+    remaining = used.slice();
+    shuffleArray(remaining);
+    used = [];
+  }
+
+  const selectedFile = remaining[0];
+  const newRemaining = remaining.slice(1);
+  const newUsed = [...used, selectedFile];
+
+  const musicUrl = `https://raw.githubusercontent.com/${GITHUB_USER}/${GITHUB_REPO}/${GITHUB_BRANCH}/music/${encodeURIComponent(selectedFile)}`;
+
+  return {
+    url: musicUrl,
+    newTracker: { remaining: newRemaining, used: newUsed }
+  };
 }
 
 function pickRandomDescription() {
@@ -108,7 +137,10 @@ const allDesigns = parseSitemap(xml);
 const tracker = JSON.parse(fs.readFileSync('data/design-tracker.json', 'utf8'));
 const result = pickDesigns(allDesigns, tracker);
 
-const musicUrl = pickRandomMusic();
+const musicTracker = JSON.parse(fs.readFileSync('data/music-tracker.json', 'utf8'));
+const musicResult = pickMusic(musicTracker);
+const musicUrl = musicResult.url;
+
 const description = pickRandomDescription();
 const hashtags = buildHashtags();
 
@@ -116,6 +148,7 @@ const description_facebook = buildFullDescription(description, result.selected, 
 const description_tiktok = buildFullDescription(description, result.selected, hashtags, 'tiktok');
 
 fs.writeFileSync('data/design-tracker.json', JSON.stringify(result.newTracker, null, 2));
+fs.writeFileSync('data/music-tracker.json', JSON.stringify(musicResult.newTracker, null, 2));
 
 const finalOutput = {
   images: result.selected.map(d => d.image_url),
@@ -133,4 +166,5 @@ console.log('\n===== IMAGES =====');
 console.log(finalOutput.images.join('\n'));
 console.log('\n===== MUSIC =====');
 console.log(musicUrl);
-console.log(`\n📦 remaining: ${result.newTracker.remaining.length} | used: ${result.newTracker.used.length}`);
+console.log(`\n📦 designs remaining: ${result.newTracker.remaining.length} | used: ${result.newTracker.used.length}`);
+console.log(`🎵 music remaining: ${musicResult.newTracker.remaining.length} | used: ${musicResult.newTracker.used.length}`);
