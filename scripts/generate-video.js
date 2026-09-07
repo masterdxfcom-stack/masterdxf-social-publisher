@@ -15,9 +15,9 @@ const TMP_DIR = "tmp_video_build";
 function downloadFile(url, destPath) {
   return new Promise((resolve, reject) => {
     const options = {
-     headers: {
+    headers: {
   'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
-  'X-Internal-Bot-Secret': 'masterdxf-publisher-9f3k2m'
+  'x-internal-bot-secret': 'masterdxf-publisher-9f3k2m'
 }
     };
     https.get(url, options, (response) => {
