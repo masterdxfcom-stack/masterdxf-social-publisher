@@ -6,8 +6,8 @@ const path = require('path');
 const WIDTH = 1080;
 const HEIGHT = 1080;
 const FPS = 30;
-const CLIP_DURATION = 3;
-const TRANSITION_DURATION = 0.6;
+const CLIP_DURATION = 2.5;
+const TRANSITION_DURATION = 0.5;
 const WATERMARK_TEXT = "MasterDXF.com";
 const TRANSITIONS = ["circleopen", "fade", "wiperight", "diagtl"];
 const TMP_DIR = "tmp_video_build";
@@ -15,11 +15,11 @@ const TMP_DIR = "tmp_video_build";
 function downloadFile(url, destPath) {
   return new Promise((resolve, reject) => {
     const options = {
-  headers: {
-  'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
-  'x-internal-bot-secret': 'masterdxf-publisher-9f3k2m',
-  'Referer': 'https://masterdxf.com/'
-}
+      headers: {
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+        'x-internal-bot-secret': 'masterdxf-publisher-9f3k2m',
+        'Referer': 'https://masterdxf.com/'
+      }
     };
     https.get(url, options, (response) => {
       if (response.statusCode >= 300 && response.statusCode < 400 && response.headers.location) {
@@ -47,7 +47,7 @@ function buildFilterComplex(imageCount) {
     const zoomExpr = zoomIn ? `min(zoom+0.0015,1.2)` : `if(eq(on,0),1.2,max(zoom-0.0015,1.0))`;
     filters.push(
       `[${i}:v]scale=${WIDTH}:${HEIGHT}:force_original_aspect_ratio=increase,crop=${WIDTH}:${HEIGHT},` +
-      `zoompan=z='${zoomExpr}':d=${clipFrames}:s=${WIDTH}x${HEIGHT}:fps=${FPS},` +
+      `zoompan=z='${zoomExpr}':x='iw/2-(iw/zoom/2)':y='ih/2-(ih/zoom/2)':d=${clipFrames}:s=${WIDTH}x${HEIGHT}:fps=${FPS},` +
       `setsar=1[v${i}]`
     );
   }
@@ -96,6 +96,9 @@ async function main() {
   const imageInputs = localImages.map(f => `-loop 1 -i "${f}"`).join(' ');
   const outputPath = 'data/latest-video.mp4';
 
+  const expectedDuration = CLIP_DURATION + (localImages.length - 1) * CLIP_DURATION;
+  const safetyDuration = (expectedDuration + 0.3).toFixed(2);
+
   const cmd = [
     'ffmpeg -y',
     imageInputs,
@@ -104,12 +107,12 @@ async function main() {
     `-map "[vout]"`,
     `-map ${localImages.length}:a`,
     `-af "volume=0.8"`,
+    `-t ${safetyDuration}`,
     `-c:v libx264 -pix_fmt yuv420p -c:a aac -b:a 128k`,
-    `-shortest`,
     `"${outputPath}"`
   ].join(' ');
 
-  console.log('🎬 جارِ بناء الفيديو...');
+  console.log('🎬 جارِ بناء الفيديو... (الطول المستهدف:', safetyDuration, 'ثانية)');
   execSync(cmd, { stdio: 'inherit' });
   console.log(`✅ تم إنشاء الفيديو: ${outputPath}`);
 
