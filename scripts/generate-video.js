@@ -11,7 +11,9 @@ const CLIP_DURATION = 2.5;
 const TRANSITION_DURATION = 0.5;
 const WATERMARK_TEXT = "MasterDXF.com";
 const TRANSITIONS = ["zoomin", "circleopen", "radial", "distance"];
+const HOOK_DURATION = 2.3;
 const TMP_DIR = "tmp_video_build";
+const HOOK_FILE = path.join(TMP_DIR, "hook_text.txt");
 
 function downloadFile(url, destPath) {
   return new Promise((resolve, reject) => {
@@ -37,6 +39,22 @@ function downloadFile(url, destPath) {
       file.on('error', (err) => { fs.unlink(destPath, () => {}); reject(err); });
     }).on('error', (err) => { reject(err); });
   });
+}
+
+function wrapText(text, maxCharsPerLine) {
+  const words = text.split(' ');
+  const lines = [];
+  let currentLine = '';
+  for (const word of words) {
+    if ((currentLine + ' ' + word).trim().length <= maxCharsPerLine) {
+      currentLine = (currentLine + ' ' + word).trim();
+    } else {
+      if (currentLine) lines.push(currentLine);
+      currentLine = word;
+    }
+  }
+  if (currentLine) lines.push(currentLine);
+  return lines.join('\n');
 }
 
 function buildFilterComplex(imageCount) {
@@ -68,7 +86,15 @@ function buildFilterComplex(imageCount) {
   filters.push(
     `[vfinal]drawtext=text='${WATERMARK_TEXT}':fontsize=34:fontcolor=white:` +
     `box=1:boxcolor=black@0.35:boxborderw=10:` +
-    `x=(w-text_w)/2:y=h-th-40[vout]`
+    `x=(w-text_w)/2:y=h-th-40[vwm]`
+  );
+
+  const hookAlpha = `if(lt(t,0.3),t/0.3,if(lt(t,${HOOK_DURATION - 0.5}),1,if(lt(t,${HOOK_DURATION}),(${HOOK_DURATION}-t)/0.5,0)))`;
+  filters.push(
+    `[vwm]drawtext=textfile='${HOOK_FILE}':fontsize=52:fontcolor=white:` +
+    `box=1:boxcolor=black@0.55:boxborderw=20:line_spacing=10:` +
+    `x=(w-text_w)/2:y=(h-text_h)/2:` +
+    `alpha='${hookAlpha}'[vout]`
   );
 
   return filters.join(";\n");
@@ -76,11 +102,14 @@ function buildFilterComplex(imageCount) {
 
 async function main() {
   const data = JSON.parse(fs.readFileSync('data/latest-output.json', 'utf8'));
-  const { images, music_url } = data;
+  const { images, music_url, hook_text } = data;
 
   if (!images || images.length === 0) throw new Error('لا توجد صور بـ latest-output.json');
 
   fs.mkdirSync(TMP_DIR, { recursive: true });
+
+  fs.writeFileSync(HOOK_FILE, wrapText(hook_text || 'MasterDXF.com', 26));
+
   const localImages = [];
   for (let i = 0; i < images.length; i++) {
     const urlExt = path.extname(new URL(images[i]).pathname) || '.jpg';
