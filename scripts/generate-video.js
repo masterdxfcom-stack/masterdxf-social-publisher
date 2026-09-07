@@ -14,15 +14,20 @@ const TMP_DIR = "tmp_video_build";
 
 function downloadFile(url, destPath) {
   return new Promise((resolve, reject) => {
-    const file = fs.createWriteStream(destPath);
     https.get(url, (response) => {
       if (response.statusCode >= 300 && response.statusCode < 400 && response.headers.location) {
         downloadFile(response.headers.location, destPath).then(resolve).catch(reject);
         return;
       }
+      if (response.statusCode !== 200) {
+        reject(new Error(`فشل التحميل: ${response.statusCode} من ${url}`));
+        return;
+      }
+      const file = fs.createWriteStream(destPath);
       response.pipe(file);
       file.on('finish', () => { file.close(); resolve(); });
-    }).on('error', (err) => { fs.unlink(destPath, () => {}); reject(err); });
+      file.on('error', (err) => { fs.unlink(destPath, () => {}); reject(err); });
+    }).on('error', (err) => { reject(err); });
   });
 }
 
@@ -71,7 +76,7 @@ async function main() {
   const localImages = [];
   for (let i = 0; i < images.length; i++) {
     const urlExt = path.extname(new URL(images[i]).pathname) || '.jpg';
-const dest = path.join(TMP_DIR, `img${i}${urlExt}`);
+    const dest = path.join(TMP_DIR, `img${i}${urlExt}`);
     await downloadFile(images[i], dest);
     localImages.push(dest);
     console.log(`✅ تم تحميل الصورة ${i + 1}/${images.length}`);
