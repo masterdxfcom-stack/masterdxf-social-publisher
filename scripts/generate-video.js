@@ -5,11 +5,12 @@ const path = require('path');
 
 const WIDTH = 1080;
 const HEIGHT = 1080;
+const SUPERSAMPLE = WIDTH * 3;
 const FPS = 30;
 const CLIP_DURATION = 2.5;
 const TRANSITION_DURATION = 0.5;
 const WATERMARK_TEXT = "MasterDXF.com";
-const TRANSITIONS = ["circleopen", "fade", "wiperight", "diagtl"];
+const TRANSITIONS = ["zoomin", "circleopen", "radial", "distance"];
 const TMP_DIR = "tmp_video_build";
 
 function downloadFile(url, destPath) {
@@ -46,7 +47,7 @@ function buildFilterComplex(imageCount) {
     const zoomIn = i % 2 === 0;
     const zoomExpr = zoomIn ? `min(zoom+0.0015,1.2)` : `if(eq(on,0),1.2,max(zoom-0.0015,1.0))`;
     filters.push(
-      `[${i}:v]scale=${WIDTH}:${HEIGHT}:force_original_aspect_ratio=increase,crop=${WIDTH}:${HEIGHT},` +
+      `[${i}:v]scale=${SUPERSAMPLE}:${SUPERSAMPLE}:force_original_aspect_ratio=increase,crop=${SUPERSAMPLE}:${SUPERSAMPLE},` +
       `zoompan=z='${zoomExpr}':x='iw/2-(iw/zoom/2)':y='ih/2-(ih/zoom/2)':d=${clipFrames}:s=${WIDTH}x${HEIGHT}:fps=${FPS},` +
       `setsar=1[v${i}]`
     );
@@ -108,11 +109,11 @@ async function main() {
     `-map ${localImages.length}:a`,
     `-af "volume=0.8"`,
     `-t ${safetyDuration}`,
-    `-c:v libx264 -pix_fmt yuv420p -c:a aac -b:a 128k`,
+    `-c:v libx264 -preset slow -crf 17 -pix_fmt yuv420p -c:a aac -b:a 128k`,
     `"${outputPath}"`
   ].join(' ');
 
-  console.log('🎬 جارِ بناء الفيديو... (الطول المستهدف:', safetyDuration, 'ثانية)');
+  console.log('🎬 جارِ بناء الفيديو بجودة عالية...');
   execSync(cmd, { stdio: 'inherit' });
   console.log(`✅ تم إنشاء الفيديو: ${outputPath}`);
 
