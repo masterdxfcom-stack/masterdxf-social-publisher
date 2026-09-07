@@ -153,6 +153,7 @@ fs.writeFileSync('data/music-tracker.json', JSON.stringify(musicResult.newTracke
 const finalOutput = {
   images: result.selected.map(d => d.image_url),
   music_url: musicUrl,
+  hook_text: description,
   description_facebook,
   description_tiktok
 };
