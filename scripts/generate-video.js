@@ -70,7 +70,8 @@ async function main() {
   fs.mkdirSync(TMP_DIR, { recursive: true });
   const localImages = [];
   for (let i = 0; i < images.length; i++) {
-    const dest = path.join(TMP_DIR, `img${i}.jpg`);
+    const urlExt = path.extname(new URL(images[i]).pathname) || '.jpg';
+const dest = path.join(TMP_DIR, `img${i}${urlExt}`);
     await downloadFile(images[i], dest);
     localImages.push(dest);
     console.log(`✅ تم تحميل الصورة ${i + 1}/${images.length}`);
