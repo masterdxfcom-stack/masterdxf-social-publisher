@@ -171,6 +171,7 @@ function buildFilterComplex(imageCount, durations, transitionDurations, totalDur
   const SS_FG = evenRound(SUPERSAMPLE * FOREGROUND_FRACTION);
 
   // لكل صورة: خلفية مموّهة تملأ الإطار بالكامل (بدون تعتيم) + التصميم كاملاً بدون أي قص في المقدمة، ثم حركة الكاميرا
+  // ملاحظة: أضفنا flags=lanczos لكل عمليات scale لتفادي فقدان التفاصيل (كانت تستعمل bilinear الافتراضي)
   for (let i = 0; i < imageCount; i++) {
     const frames = Math.round((durations[i] + (transitionDurations[i] || transitionDurations[i - 1] || 0.4)) * FPS);
     const motion = getMotionExpr(i, frames);
@@ -180,11 +181,11 @@ function buildFilterComplex(imageCount, durations, transitionDurations, totalDur
       zoomExpr = `if(lt(on,${punchFrames}),1+0.35*(on/${punchFrames}),${motion.zoom})`;
     }
     filters.push(
-      `[${i}:v]split=2[bg${i}s][fg${i}s];` +
-      `[bg${i}s]scale=${SUPERSAMPLE}:${SUPERSAMPLE}:force_original_aspect_ratio=increase,crop=${SUPERSAMPLE}:${SUPERSAMPLE},gblur=sigma=30,vignette=angle=PI/3.6[bg${i}];` +
-      `[fg${i}s]scale=${SS_FG}:${SS_FG}:force_original_aspect_ratio=decrease:flags=lanczos[fg${i}];` +
+      `[${i}:v]format=rgba,split=2[bg${i}s][fg${i}s];` +
+      `[bg${i}s]scale=${SUPERSAMPLE}:${SUPERSAMPLE}:force_original_aspect_ratio=increase:flags=lanczos+accurate_rnd+full_chroma_int,crop=${SUPERSAMPLE}:${SUPERSAMPLE},gblur=sigma=30[bg${i}];` +
+      `[fg${i}s]scale=${SS_FG}:${SS_FG}:force_original_aspect_ratio=decrease:flags=lanczos+accurate_rnd+full_chroma_int[fg${i}];` +
       `[bg${i}][fg${i}]overlay=(W-w)/2:(H-h)/2[comp${i}];` +
-      `[comp${i}]zoompan=z='${zoomExpr}':x='${motion.x}':y='${motion.y}':d=${frames}:s=${WIDTH}x${HEIGHT}:fps=${FPS},setsar=1[v${i}]`
+      `[comp${i}]zoompan=z='${zoomExpr}':x='${motion.x}':y='${motion.y}':d=${frames}:s=${WIDTH}x${HEIGHT}:fps=${FPS}:fps_mode=vfr,scale=${WIDTH}:${HEIGHT}:flags=lanczos,setsar=1[v${i}]`
     );
   }
 
@@ -294,39 +295,30 @@ async function main() {
   const outputPath = 'data/latest-video.mp4';
   const safetyDuration = (totalDuration + 0.3).toFixed(2);
 
-  // Two-Pass Encoding بهدف بترات ثابت (6 Mbps) — آمن تحت سقف TikTok API (10 Mbps)،
-  // وممتاز لـ Instagram/Facebook، مع أعلى جودة ممكنة ضمن هذا الحجم المحدد مسبقًا
-  // البترات يُحسب ديناميكيًا حسب مدة كل فيديو، بحيث الحجم النهائي يستهدف ≈ 6MB بالضبط
-  const passLogFile = path.join(TMP_DIR, 'ffmpeg2pass');
-  const TARGET_SIZE_MB = 7.5; // محسوبة: 512MB شهريًا ÷ 60 فيديو = 8.53MB نظريًا، مع هامش أمان لباقي عمليات Make
-  const AUDIO_BITRATE_KBPS = 128; // مخفّض من 192 لترك مساحة أكبر لجودة الصورة ضمن سقف 6MB
-  const durationSec = parseFloat(safetyDuration);
-  const targetTotalBits = TARGET_SIZE_MB * 8 * 1024 * 1024 * 0.97; // هامش أمان 3% لحاوية MP4
-  const audioBits = AUDIO_BITRATE_KBPS * 1000 * durationSec;
-  const videoKbps = Math.max(300, Math.round((targetTotalBits - audioBits) / durationSec / 1000));
-  const TARGET_BITRATE = `${videoKbps}k`;
-  const MAX_BITRATE = `${Math.round(videoKbps * 1.15)}k`;
-  const BUF_SIZE = `${Math.round(videoKbps * 2)}k`;
-  console.log(`ℹ️ مدة الفيديو: ${durationSec}s → بترات فيديو مستهدف: ${videoKbps} kbps (لتحقيق ≈${TARGET_SIZE_MB}MB)`);
-
-  const commonVideoArgs = [
+  // ملاحظات على التعديلات:
+  // 1) -sws_flags lanczos+accurate_rnd+full_chroma_int : يفرض خوارزمية تصغير/تكبير عالية الجودة على
+  //    كل عمليات scale الداخلية بما فيها zoompan، فيقل فقدان التفاصيل (كان سبب الصورة "الطرية").
+  // 2) -colorspace/-color_primaries/-color_trc bt709 + -color_range tv : يثبّت الـ metadata الخاصة
+  //    بمساحة الألوان في الفيديو الناتج، فيتفادى تفسير الأسود كرمادي (washed out black) على بعض
+  //    المشغلات (منصات الموبايل، يوتيوب شورتس، إلخ) التي كانت تخمّن نطاق الألوان بشكل خاطئ.
+  const cmd = [
     'ffmpeg -y',
+    '-sws_flags lanczos+accurate_rnd+full_chroma_int',
     imageInputs,
     `-i "${localMusic}"`,
     `-filter_complex "${filterComplex}"`,
     `-map "[vout]"`,
+    `-map ${localImages.length}:a`,
+    `-af "volume=0.8"`,
     `-t ${safetyDuration}`,
-    `-c:v libx264 -profile:v high -preset medium -tune animation -x264-params "aq-mode=3"`,
-    `-b:v ${TARGET_BITRATE} -maxrate ${MAX_BITRATE} -bufsize ${BUF_SIZE} -pix_fmt yuv420p`
+    `-c:v libx264 -profile:v high -preset slow -crf 16 -pix_fmt yuv420p`,
+    `-colorspace bt709 -color_primaries bt709 -color_trc bt709 -color_range tv`,
+    `-c:a aac -b:a 192k -movflags +faststart`,
+    `"${outputPath}"`
   ].join(' ');
 
-  const pass1Cmd = `${commonVideoArgs} -an -pass 1 -passlogfile "${passLogFile}" -f null /dev/null`;
-  const pass2Cmd = `${commonVideoArgs} -map ${localImages.length}:a -af "volume=0.8" -pass 2 -passlogfile "${passLogFile}" -c:a aac -b:a ${AUDIO_BITRATE_KBPS}k -movflags +faststart "${outputPath}"`;
-
-  console.log('🎬 المرحلة 1/2: تحليل الفيديو (Pass 1)...');
-  execSync(pass1Cmd, { stdio: 'inherit' });
-  console.log('🎬 المرحلة 2/2: بناء الفيديو النهائي (Pass 2)...');
-  execSync(pass2Cmd, { stdio: 'inherit' });
+  console.log('🎬 جارِ بناء الفيديو الاحترافي...');
+  execSync(cmd, { stdio: 'inherit' });
   console.log(`✅ تم إنشاء الفيديو: ${outputPath}`);
 
   fs.rmSync(TMP_DIR, { recursive: true, force: true });
