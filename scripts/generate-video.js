@@ -303,7 +303,7 @@ async function main() {
     `-map ${localImages.length}:a`,
     `-af "volume=0.8"`,
     `-t ${safetyDuration}`,
-    `-c:v libx264 -profile:v high -preset slow -tune animation -crf 16 -pix_fmt yuv420p -c:a aac -b:a 192k -movflags +faststart`,
+    `-c:v libx264 -profile:v high -preset medium -tune animation -crf 16 -x264-params "aq-mode=3" -pix_fmt yuv420p -c:a aac -b:a 192k -movflags +faststart`,
     `"${outputPath}"`
   ].join(' ');
 
