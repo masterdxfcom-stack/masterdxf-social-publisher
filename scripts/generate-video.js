@@ -207,10 +207,13 @@ function buildFilterComplex(imageCount, durations, transitionDurations, totalDur
   const flashAlpha = `lt(mod(t,1.1),0.04)*0.15`;
   filters.push(`[${lastLabel}]eq=brightness='${flashAlpha}'[vflash]`);
 
+  // الواترمارك: في منتصف الإطار فوق التصميم، شفاف قليلاً، مع حركة انسيابية بطيئة (drift) طوال الفيديو
+  const wmDriftX = `(w-text_w)/2 + 22*sin(2*PI*t/6)`;
+  const wmDriftY = `(h-text_h)/2 + 16*sin(2*PI*t/8+1)`;
   filters.push(
-    `[vflash]drawtext=fontfile='${fontFile}':text='${WATERMARK_TEXT}':fontsize=26:fontcolor=white@0.9:` +
-    `borderw=2:bordercolor=black@0.55:shadowcolor=black@0.4:shadowx=1:shadowy=1:` +
-    `x=w-text_w-28:y=h-th-28[vwm]`
+    `[vflash]drawtext=fontfile='${fontFile}':text='${WATERMARK_TEXT}':fontsize=46:fontcolor=white@0.32:` +
+    `borderw=2:bordercolor=black@0.25:shadowcolor=black@0.2:shadowx=1:shadowy=1:` +
+    `x='${wmDriftX}':y='${wmDriftY}'[vwm]`
   );
 
   // الـHook: سطر بسطر (توسيط صحيح لكل سطر) مع حجم خط يتكيف مع طول النص
