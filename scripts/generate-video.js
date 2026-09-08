@@ -13,6 +13,7 @@ const MIN_TRANSITION_DURATION = 0.3;
 const MAX_TRANSITION_DURATION = 0.5;
 const WATERMARK_TEXT = "MasterDXF.com";
 const ACCENT_COLOR = "0xFFC107"; // أصفر/برتقالي لافت للكلمات المهمة (FREE, MasterDXF.com)
+const FOREGROUND_FRACTION = 0.74; // نسبة مساحة التصميم من الإطار حتى يبقى كاملاً وغير مقصوص أثناء الزووم
 const TRANSITIONS = ["zoomin", "circleopen", "radial", "distance", "smoothleft", "smoothright", "hblur", "dissolve", "wiperight", "wipeleft", "diagtl", "diagbr"];
 const HOOK_DURATION = 2.4;
 const OUTRO_DURATION = 1.8;
@@ -66,7 +67,6 @@ function wrapText(text, maxCharsPerLine) {
 
 // ===== الجزء الجديد =====
 
-// نفس منطق wrapText لكن يرجع مصفوفة أسطر بدل نص واحد، لنتحكم بكل سطر على حدة (توسيط صحيح)
 function wrapLines(text, maxCharsPerLine) {
   const words = text.split(' ');
   const lines = [];
@@ -88,7 +88,6 @@ function evenRound(n) {
   return r % 2 === 0 ? r : r + 1;
 }
 
-// يبحث عن خط bold عالي الجودة متوفر فعليًا على النظام (بدون تحميل أي شيء)، وإلا يستخدم DejaVu كافتراضي
 function pickFont() {
   const candidates = ["Archivo Black", "Anton", "Poppins.*Bold", "Montserrat.*Bold", "Liberation Sans.*Bold"];
   for (const pattern of candidates) {
@@ -169,8 +168,9 @@ function getMotionExpr(index, frames) {
 
 function buildFilterComplex(imageCount, durations, transitionDurations, totalDuration, hookText, fontFile) {
   const filters = [];
+  const SS_FG = evenRound(SUPERSAMPLE * FOREGROUND_FRACTION);
 
-  // لكل صورة: عرض الصورة كاملة كما هي (بدون قص وبدون خلفية مضافة)، حواف بيضاء بسيطة إن لزم، ثم حركة الكاميرا
+  // لكل صورة: خلفية مموّهة تملأ الإطار بالكامل (بدون تعتيم) + التصميم كاملاً بدون أي قص في المقدمة، ثم حركة الكاميرا
   for (let i = 0; i < imageCount; i++) {
     const frames = Math.round((durations[i] + (transitionDurations[i] || transitionDurations[i - 1] || 0.4)) * FPS);
     const motion = getMotionExpr(i, frames);
@@ -180,9 +180,11 @@ function buildFilterComplex(imageCount, durations, transitionDurations, totalDur
       zoomExpr = `if(lt(on,${punchFrames}),1+0.35*(on/${punchFrames}),${motion.zoom})`;
     }
     filters.push(
-      `[${i}:v]scale=${SUPERSAMPLE}:${SUPERSAMPLE}:force_original_aspect_ratio=decrease:flags=lanczos,` +
-      `pad=${SUPERSAMPLE}:${SUPERSAMPLE}:(ow-iw)/2:(oh-ih)/2:color=white,unsharp=5:5:0.8:5:5:0.0,` +
-      `zoompan=z='${zoomExpr}':x='${motion.x}':y='${motion.y}':d=${frames}:s=${WIDTH}x${HEIGHT}:fps=${FPS},setsar=1[v${i}]`
+      `[${i}:v]split=2[bg${i}s][fg${i}s];` +
+      `[bg${i}s]scale=${SUPERSAMPLE}:${SUPERSAMPLE}:force_original_aspect_ratio=increase,crop=${SUPERSAMPLE}:${SUPERSAMPLE},gblur=sigma=30[bg${i}];` +
+      `[fg${i}s]scale=${SS_FG}:${SS_FG}:force_original_aspect_ratio=decrease[fg${i}];` +
+      `[bg${i}][fg${i}]overlay=(W-w)/2:(H-h)/2[comp${i}];` +
+      `[comp${i}]zoompan=z='${zoomExpr}':x='${motion.x}':y='${motion.y}':d=${frames}:s=${WIDTH}x${HEIGHT}:fps=${FPS},setsar=1[v${i}]`
     );
   }
 
@@ -203,7 +205,7 @@ function buildFilterComplex(imageCount, durations, transitionDurations, totalDur
   const flashAlpha = `lt(mod(t,1.1),0.04)*0.15`;
   filters.push(`[${lastLabel}]eq=brightness='${flashAlpha}'[vflash]`);
 
-  // الواترمارك: في منتصف الإطار فوق التصميم، شفاف قليلاً، مع حركة انسيابية بطيئة (drift) طوال الفيديو
+  // الواترمارك: في منتصف الإطار فوق التصميم، شفاف، بدون حدود أو ظل، مع حركة انسيابية بطيئة (drift)
   const wmDriftX = `(w-text_w)/2 + 22*sin(2*PI*t/6)`;
   const wmDriftY = `(h-text_h)/2 + 16*sin(2*PI*t/8+1)`;
   filters.push(
@@ -301,7 +303,7 @@ async function main() {
     `-map ${localImages.length}:a`,
     `-af "volume=0.8"`,
     `-t ${safetyDuration}`,
-    `-c:v libx264 -profile:v high -preset slow -crf 14 -pix_fmt yuv420p -c:a aac -b:a 192k -movflags +faststart`,
+    `-c:v libx264 -profile:v high -preset slow -crf 16 -pix_fmt yuv420p -c:a aac -b:a 192k -movflags +faststart`,
     `"${outputPath}"`
   ].join(' ');
 
