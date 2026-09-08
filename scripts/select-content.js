@@ -65,7 +65,6 @@ function pickDesigns(allDesigns, tracker) {
   };
 }
 
-// ==== جديد: اختيار موسيقى بدون تكرار (نفس منطق التصاميم بالضبط) ====
 function pickMusic(tracker) {
   const allFilenames = fs.readdirSync('music').filter(f => f.toLowerCase().endsWith('.mp3'));
   let remaining = tracker.remaining || [];
@@ -105,12 +104,13 @@ function pickRandomDescription() {
   return descriptions[Math.floor(Math.random() * descriptions.length)];
 }
 
-function buildHashtags() {
+// ⚠️ جديد: يبني هاشتاغ حسب المنصة (عدد ثابت + عدد عشوائي مختلفين لكل منصة)
+function buildHashtags(fixedList, randomCount) {
   const data = JSON.parse(fs.readFileSync('config/hashtags.json', 'utf8'));
   const pool = [...data.pool];
   shuffleArray(pool);
-  const randomFour = pool.slice(0, 4);
-  return [...data.fixed, ...randomFour];
+  const randomPicks = pool.slice(0, randomCount);
+  return [...fixedList, ...randomPicks];
 }
 
 function withUtm(baseUrl, platform, content) {
@@ -142,10 +142,13 @@ const musicResult = pickMusic(musicTracker);
 const musicUrl = musicResult.url;
 
 const description = pickRandomDescription();
-const hashtags = buildHashtags();
 
-const description_facebook = buildFullDescription(description, result.selected, hashtags, 'facebook');
-const description_tiktok = buildFullDescription(description, result.selected, hashtags, 'tiktok');
+const hashtagData = JSON.parse(fs.readFileSync('config/hashtags.json', 'utf8'));
+const hashtagsFacebook = buildHashtags(hashtagData.fixed, 4);       // 5 ثابت + 4 عشوائي = 9
+const hashtagsTiktok = buildHashtags(hashtagData.fixed_tiktok, 2);  // 3 ثابت + 2 عشوائي = 5
+
+const description_facebook = buildFullDescription(description, result.selected, hashtagsFacebook, 'facebook');
+const description_tiktok = buildFullDescription(description, result.selected, hashtagsTiktok, 'tiktok');
 
 fs.writeFileSync('data/design-tracker.json', JSON.stringify(result.newTracker, null, 2));
 fs.writeFileSync('data/music-tracker.json', JSON.stringify(musicResult.newTracker, null, 2));
