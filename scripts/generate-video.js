@@ -211,7 +211,7 @@ function buildFilterComplex(imageCount, durations, transitionDurations, totalDur
   const wmDriftX = `(w-text_w)/2 + 22*sin(2*PI*t/6)`;
   const wmDriftY = `(h-text_h)/2 + 16*sin(2*PI*t/8+1)`;
   filters.push(
-    `[vflash]drawtext=fontfile='${fontFile}':text='${WATERMARK_TEXT}':fontsize=34:fontcolor=white@0.22:` +
+    `[vflash]drawtext=fontfile='${fontFile}':text='${WATERMARK_TEXT}':fontsize=24:fontcolor=white@0.14:` +
     `borderw=2:bordercolor=black@0.25:shadowcolor=black@0.2:shadowx=1:shadowy=1:` +
     `x='${wmDriftX}':y='${wmDriftY}'[vwm]`
   );
