@@ -7,18 +7,18 @@ const WIDTH = 1080;
 const HEIGHT = 1080;
 const SUPERSAMPLE = WIDTH * 3;
 const FPS = 30;
-const MIN_CLIP_DURATION = 1.4;
-const MAX_CLIP_DURATION = 2.3;
+const MIN_CLIP_DURATION = 3.0;   // على الأقل 3 ثواني لكل صورة
+const MAX_CLIP_DURATION = 3.6;
 const MIN_TRANSITION_DURATION = 0.3;
 const MAX_TRANSITION_DURATION = 0.5;
 const WATERMARK_TEXT = "MasterDXF.com";
 const ACCENT_COLOR = "0xFFC107"; // أصفر/برتقالي لافت للكلمات المهمة (FREE, MasterDXF.com)
+const FOREGROUND_FRACTION = 0.74; // نسبة مساحة التصميم من الإطار حتى يبقى كاملاً وغير مقصوص أثناء الزووم
 const TRANSITIONS = ["zoomin", "circleopen", "radial", "distance", "smoothleft", "smoothright", "hblur", "dissolve", "wiperight", "wipeleft", "diagtl", "diagbr"];
 const HOOK_DURATION = 2.4;
 const OUTRO_DURATION = 1.8;
-const BOLD_FONT = "/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf";
+const BOLD_FONT = "/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf"; // fallback افتراضي
 const TMP_DIR = "tmp_video_build";
-const HOOK_FILE = path.join(TMP_DIR, "hook_text.txt");
 const OUTRO_FILE_1 = path.join(TMP_DIR, "outro_text_1.txt");
 const OUTRO_FILE_2 = path.join(TMP_DIR, "outro_text_2.txt");
 
@@ -65,23 +65,57 @@ function wrapText(text, maxCharsPerLine) {
   return lines.join('\n');
 }
 
-// ===== الجزء الجديد: منطق الحركة والانتقالات الاحترافية =====
+// ===== الجزء الجديد =====
 
-// يحسب مدة ديناميكية لكل صورة: أول صورة وآخر صورة أطول قليلاً (أهم لحظات الفيديو)
+// نفس منطق wrapText لكن يرجع مصفوفة أسطر بدل نص واحد، لنتحكم بكل سطر على حدة (توسيط صحيح)
+function wrapLines(text, maxCharsPerLine) {
+  const words = text.split(' ');
+  const lines = [];
+  let currentLine = '';
+  for (const word of words) {
+    if ((currentLine + ' ' + word).trim().length <= maxCharsPerLine) {
+      currentLine = (currentLine + ' ' + word).trim();
+    } else {
+      if (currentLine) lines.push(currentLine);
+      currentLine = word;
+    }
+  }
+  if (currentLine) lines.push(currentLine);
+  return lines;
+}
+
+function evenRound(n) {
+  const r = Math.round(n);
+  return r % 2 === 0 ? r : r + 1;
+}
+
+// يبحث عن خط bold عالي الجودة متوفر فعليًا على النظام (بدون تحميل أي شيء)، وإلا يستخدم DejaVu كافتراضي
+function pickFont() {
+  const candidates = ["Archivo Black", "Anton", "Poppins.*Bold", "Montserrat.*Bold", "Liberation Sans.*Bold"];
+  for (const pattern of candidates) {
+    try {
+      const out = execSync(`fc-list | grep -iE "${pattern}" | head -n1`, { encoding: 'utf8' }).trim();
+      if (out) {
+        const filePath = out.split(':')[0].trim();
+        if (filePath && fs.existsSync(filePath)) return filePath;
+      }
+    } catch (e) { /* fontconfig غير متوفر، نتابع للخيار التالي */ }
+  }
+  return BOLD_FONT;
+}
+
 function computeClipDurations(imageCount, bpm) {
   const durations = [];
   for (let i = 0; i < imageCount; i++) {
     let d;
     if (i === 0) {
-      d = MAX_CLIP_DURATION; // أقوى تصميم في البداية يأخذ وقته
+      d = MAX_CLIP_DURATION;
     } else if (i === imageCount - 1) {
-      d = MAX_CLIP_DURATION - 0.1; // آخر تصميم قبل الـCTA
+      d = MAX_CLIP_DURATION - 0.1;
     } else {
-      // تصاعد بصري خفيف: نتحرك بين الحد الأدنى والأقصى بموجة ناعمة بدل العشوائية الكاملة
-      const wave = (Math.sin(i * 1.7) + 1) / 2; // 0..1
+      const wave = (Math.sin(i * 1.7) + 1) / 2;
       d = MIN_CLIP_DURATION + wave * (MAX_CLIP_DURATION - MIN_CLIP_DURATION);
     }
-    // إذا توفر bpm في latest-output.json، نقرّب المدة لأقرب مضاعف لضربة الموسيقى (Beat Sync تقريبي)
     if (bpm && bpm > 0) {
       const beat = 60 / bpm;
       const beats = Math.max(1, Math.round(d / beat));
@@ -105,7 +139,6 @@ function computeTransitionDurations(imageCount, bpm) {
   return list;
 }
 
-// حركة كاميرا مختلفة لكل صورة بدل نفس الزووم للجميع
 function getMotionExpr(index, frames) {
   const types = ['zoomIn', 'zoomOut', 'pushLeft', 'pushRight', 'pushUp', 'pushDown', 'diagonal', 'slowPan', 'fastPush', 'dynamicZoom'];
   const type = types[index % types.length];
@@ -135,23 +168,25 @@ function getMotionExpr(index, frames) {
   }
 }
 
-function buildFilterComplex(imageCount, durations, transitionDurations, totalDuration) {
+function buildFilterComplex(imageCount, durations, transitionDurations, totalDuration, hookText, fontFile) {
   const filters = [];
+  const SS_FG = evenRound(SUPERSAMPLE * FOREGROUND_FRACTION);
 
-  // أول صورة تبدأ بـ Push-in سريع جدًا (0.1-0.3s) قبل أن تدخل حركتها العادية
+  // لكل صورة: خلفية مموّهة تملأ الإطار بالكامل + التصميم كاملاً بدون أي قص في المقدمة، ثم حركة الكاميرا
   for (let i = 0; i < imageCount; i++) {
     const frames = Math.round((durations[i] + (transitionDurations[i] || transitionDurations[i - 1] || 0.4)) * FPS);
     const motion = getMotionExpr(i, frames);
     let zoomExpr = motion.zoom;
     if (i === 0) {
-      // Punch-in فوري في أول 0.2 ثانية فقط ثم استكمال الحركة العادية
       const punchFrames = Math.round(0.2 * FPS);
       zoomExpr = `if(lt(on,${punchFrames}),1+0.35*(on/${punchFrames}),${motion.zoom})`;
     }
     filters.push(
-      `[${i}:v]scale=${SUPERSAMPLE}:${SUPERSAMPLE}:force_original_aspect_ratio=increase,crop=${SUPERSAMPLE}:${SUPERSAMPLE},` +
-      `zoompan=z='${zoomExpr}':x='${motion.x}':y='${motion.y}':d=${frames}:s=${WIDTH}x${HEIGHT}:fps=${FPS},` +
-      `setsar=1[v${i}]`
+      `[${i}:v]split=2[bg${i}s][fg${i}s];` +
+      `[bg${i}s]scale=${SUPERSAMPLE}:${SUPERSAMPLE}:force_original_aspect_ratio=increase,crop=${SUPERSAMPLE}:${SUPERSAMPLE},gblur=sigma=30,eq=brightness=-0.12:saturation=0.85[bg${i}];` +
+      `[fg${i}s]scale=${SS_FG}:${SS_FG}:force_original_aspect_ratio=decrease[fg${i}];` +
+      `[bg${i}][fg${i}]overlay=(W-w)/2:(H-h)/2[comp${i}];` +
+      `[comp${i}]zoompan=z='${zoomExpr}':x='${motion.x}':y='${motion.y}':d=${frames}:s=${WIDTH}x${HEIGHT}:fps=${FPS},setsar=1[v${i}]`
     );
   }
 
@@ -167,45 +202,59 @@ function buildFilterComplex(imageCount, durations, transitionDurations, totalDur
     lastLabel = outLabel;
     cumulativeOffset += durations[i] - tDur;
   }
-  // في حال صورة واحدة فقط
   if (imageCount === 1) lastLabel = "vfinal", filters[filters.length - 1] = filters[filters.length - 1].replace('[v0]', '[vfinal]');
 
-  // Light flash خفيف عند كل انتقال تقريبًا (إحساس بضربة الموسيقى)
   const flashAlpha = `lt(mod(t,1.1),0.04)*0.15`;
-  filters.push(
-    `[${lastLabel}]eq=brightness='${flashAlpha}'[vflash]`
-  );
+  filters.push(`[${lastLabel}]eq=brightness='${flashAlpha}'[vflash]`);
 
-  // الواترمارك: بدون صندوق، ظل خفيف فقط، صغير وغير مزعج
   filters.push(
-    `[vflash]drawtext=fontfile='${BOLD_FONT}':text='${WATERMARK_TEXT}':fontsize=26:fontcolor=white@0.9:` +
+    `[vflash]drawtext=fontfile='${fontFile}':text='${WATERMARK_TEXT}':fontsize=26:fontcolor=white@0.9:` +
     `borderw=2:bordercolor=black@0.55:shadowcolor=black@0.4:shadowx=1:shadowy=1:` +
     `x=w-text_w-28:y=h-th-28[vwm]`
   );
 
-  // الـHook: يظهر بعد التصميم مباشرة (0.15s)، دخول Fade+Slide سريع، خروج سريع قبل نهاية HOOK_DURATION
-  const hookIn = 0.15, hookHold = HOOK_DURATION - 0.6, hookOutStart = HOOK_DURATION - 0.45;
-  const hookAlpha = `if(lt(t,${hookIn}),0,if(lt(t,${hookIn + 0.25}),(t-${hookIn})/0.25,if(lt(t,${hookOutStart}),1,if(lt(t,${HOOK_DURATION}),(${HOOK_DURATION}-t)/0.45,0))))`;
-  const hookY = `if(lt(t,${hookIn + 0.25}),(h*0.58)-((h*0.58)-(h-th)/2)*((t-${hookIn})/0.25),(h-th)/2)`;
-  filters.push(
-    `[vwm]drawtext=fontfile='${BOLD_FONT}':textfile='${HOOK_FILE}':fontsize=62:fontcolor=${ACCENT_COLOR}:` +
-    `borderw=7:bordercolor=black:shadowcolor=black@0.65:shadowx=5:shadowy=5:line_spacing=14:` +
-    `x=(w-text_w)/2:y='${hookY}':` +
-    `alpha='${hookAlpha}':enable='lt(t,${HOOK_DURATION})'[vhook]`
-  );
+  // الـHook: سطر بسطر (توسيط صحيح لكل سطر) مع حجم خط يتكيف مع طول النص
+  const roughLines = wrapLines(hookText || 'FREE DXF DESIGNS', 20);
+  let hookFontSize = 64;
+  if (roughLines.length === 3) hookFontSize = 56;
+  else if (roughLines.length === 4) hookFontSize = 48;
+  else if (roughLines.length >= 5) hookFontSize = 40;
+  const maxCharsFinal = Math.max(10, Math.floor(920 / (hookFontSize * 0.62)));
+  const hookLines = wrapLines(hookText || 'FREE DXF DESIGNS', maxCharsFinal);
+  const lineHeight = Math.round(hookFontSize * 1.3);
+  const numLines = hookLines.length;
 
-  // الـOutro (آخر 1.8s): "FREE DXF FILES" ثم "MasterDXF.com"، مع Zoom بسيط (متكفّل به آخر motion أصلاً)
+  const hookIn = 0.15;
+  const hookOutStart = HOOK_DURATION - 0.45;
+  const hookAlpha = `if(lt(t,${hookIn}),0,if(lt(t,${hookIn + 0.25}),(t-${hookIn})/0.25,if(lt(t,${hookOutStart}),1,if(lt(t,${HOOK_DURATION}),(${HOOK_DURATION}-t)/0.45,0))))`;
+  const hookCenterY = `if(lt(t,${hookIn + 0.25}),(h*0.58)-((h*0.58)-(h*0.5))*((t-${hookIn})/0.25),h*0.5)`;
+
+  let lastLabel2 = "vwm";
+  hookLines.forEach((line, idx) => {
+    const lineFile = path.join(TMP_DIR, `hook_line_${idx}.txt`);
+    fs.writeFileSync(lineFile, line);
+    const offset = (idx - (numLines - 1) / 2) * lineHeight;
+    const outLbl = idx === numLines - 1 ? "vhook" : `vh${idx}`;
+    filters.push(
+      `[${lastLabel2}]drawtext=fontfile='${fontFile}':textfile='${lineFile}':fontsize=${hookFontSize}:fontcolor=${ACCENT_COLOR}:` +
+      `borderw=7:bordercolor=black:shadowcolor=black@0.65:shadowx=5:shadowy=5:` +
+      `x=(w-text_w)/2:y='(${hookCenterY})+(${offset.toFixed(2)})-(text_h/2)':` +
+      `alpha='${hookAlpha}':enable='lt(t,${HOOK_DURATION})'[${outLbl}]`
+    );
+    lastLabel2 = outLbl;
+  });
+
   const outroStart = totalDuration - OUTRO_DURATION;
   const midPoint = outroStart + OUTRO_DURATION * 0.5;
   const outroAlpha1 = `if(lt(t,${outroStart}),0,if(lt(t,${outroStart + 0.2}),(t-${outroStart})/0.2,if(lt(t,${midPoint}),1,0)))`;
   const outroAlpha2 = `if(lt(t,${midPoint}),0,if(lt(t,${midPoint + 0.2}),(t-${midPoint})/0.2,if(lt(t,${totalDuration}),1,0)))`;
   filters.push(
-    `[vhook]drawtext=fontfile='${BOLD_FONT}':textfile='${OUTRO_FILE_1}':fontsize=56:fontcolor=white:` +
+    `[${lastLabel2}]drawtext=fontfile='${fontFile}':textfile='${OUTRO_FILE_1}':fontsize=56:fontcolor=white:` +
     `borderw=6:bordercolor=black:shadowcolor=black@0.6:shadowx=4:shadowy=4:` +
     `x=(w-text_w)/2:y=(h-text_h)/2-60:alpha='${outroAlpha1}'[vout1]`
   );
   filters.push(
-    `[vout1]drawtext=fontfile='${BOLD_FONT}':textfile='${OUTRO_FILE_2}':fontsize=52:fontcolor=${ACCENT_COLOR}:` +
+    `[vout1]drawtext=fontfile='${fontFile}':textfile='${OUTRO_FILE_2}':fontsize=52:fontcolor=${ACCENT_COLOR}:` +
     `borderw=6:bordercolor=black:shadowcolor=black@0.6:shadowx=4:shadowy=4:` +
     `x=(w-text_w)/2:y=(h-text_h)/2+30:alpha='${outroAlpha2}'[vout]`
   );
@@ -220,7 +269,6 @@ async function main() {
   if (!images || images.length === 0) throw new Error('لا توجد صور بـ latest-output.json');
 
   fs.mkdirSync(TMP_DIR, { recursive: true });
-  fs.writeFileSync(HOOK_FILE, wrapText(hook_text || 'FREE DXF DESIGNS 🔥', 22));
   fs.writeFileSync(OUTRO_FILE_1, wrapText('FREE DXF FILES', 22));
   fs.writeFileSync(OUTRO_FILE_2, wrapText('MasterDXF.com', 22));
 
@@ -236,11 +284,12 @@ async function main() {
   await downloadFile(music_url, localMusic);
   console.log('✅ تم تحميل الموسيقى');
 
+  const fontFile = pickFont();
   const durations = computeClipDurations(localImages.length, bpm);
   const transitionDurations = computeTransitionDurations(localImages.length, bpm);
   const totalDuration = durations.reduce((a, b) => a + b, 0) - transitionDurations.reduce((a, b) => a + b, 0);
 
-  const filterComplex = buildFilterComplex(localImages.length, durations, transitionDurations, totalDuration);
+  const filterComplex = buildFilterComplex(localImages.length, durations, transitionDurations, totalDuration, hook_text, fontFile);
   const imageInputs = localImages.map(f => `-loop 1 -i "${f}"`).join(' ');
   const outputPath = 'data/latest-video.mp4';
   const safetyDuration = (totalDuration + 0.3).toFixed(2);
