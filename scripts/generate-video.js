@@ -14,6 +14,10 @@ const MAX_TRANSITION_DURATION = 0.5;
 const WATERMARK_TEXT = "MasterDXF.com";
 const ACCENT_COLOR = "0xFFC107"; // أصفر/برتقالي لافت للكلمات المهمة (FREE, MasterDXF.com)
 const FOREGROUND_FRACTION = 0.74; // نسبة مساحة التصميم من الإطار حتى يبقى كاملاً وغير مقصوص أثناء الزووم
+// zoompan يستعمل خوارزمية تصغير داخلية ضعيفة الجودة ولا يقبل flags=lanczos إطلاقًا.
+// لذلك نخليه يخرج بحجم وسيط (2x الحجم النهائي) بدل الحجم النهائي مباشرة، ثم فلتر scale منفصل
+// بـ lanczos بعده يدير التصغير الحقيقي عالي الجودة.
+const ZOOMPAN_INTERMEDIATE = WIDTH * 2;
 const TRANSITIONS = ["zoomin", "circleopen", "radial", "distance", "smoothleft", "smoothright", "hblur", "dissolve", "wiperight", "wipeleft", "diagtl", "diagbr"];
 const HOOK_DURATION = 2.4;
 const OUTRO_DURATION = 1.8;
@@ -185,7 +189,7 @@ function buildFilterComplex(imageCount, durations, transitionDurations, totalDur
       `[bg${i}s]scale=${SUPERSAMPLE}:${SUPERSAMPLE}:force_original_aspect_ratio=increase:flags=lanczos+accurate_rnd+full_chroma_int,crop=${SUPERSAMPLE}:${SUPERSAMPLE},gblur=sigma=30[bg${i}];` +
       `[fg${i}s]scale=${SS_FG}:${SS_FG}:force_original_aspect_ratio=decrease:flags=lanczos+accurate_rnd+full_chroma_int[fg${i}];` +
       `[bg${i}][fg${i}]overlay=(W-w)/2:(H-h)/2[comp${i}];` +
-      `[comp${i}]zoompan=z='${zoomExpr}':x='${motion.x}':y='${motion.y}':d=${frames}:s=${WIDTH}x${HEIGHT}:fps=${FPS},scale=${WIDTH}:${HEIGHT}:flags=lanczos,setsar=1[v${i}]`
+      `[comp${i}]zoompan=z='${zoomExpr}':x='${motion.x}':y='${motion.y}':d=${frames}:s=${ZOOMPAN_INTERMEDIATE}x${ZOOMPAN_INTERMEDIATE}:fps=${FPS},scale=${WIDTH}:${HEIGHT}:flags=lanczos+accurate_rnd+full_chroma_int,setsar=1[v${i}]`
     );
   }
 
@@ -257,8 +261,14 @@ function buildFilterComplex(imageCount, durations, transitionDurations, totalDur
   filters.push(
     `[vout1]drawtext=fontfile='${fontFile}':textfile='${OUTRO_FILE_2}':fontsize=52:fontcolor=${ACCENT_COLOR}:` +
     `borderw=6:bordercolor=black:shadowcolor=black@0.6:shadowx=4:shadowy=4:` +
-    `x=(w-text_w)/2:y=(h-text_h)/2+30:alpha='${outroAlpha2}'[vout]`
+    `x=(w-text_w)/2:y=(h-text_h)/2+30:alpha='${outroAlpha2}'[voutraw]`
   );
+
+  // تحويل صريح ودقيق من RGB (full range) إلى YUV420p (limited range, BT.709) باستعمال zscale
+  // بدل الاعتماد على تحويل ضمني تلقائي قد لا يطابق الوسوم (metadata) اللي نحطوها فـ الترميز.
+  // هادا يمنع أي "mismatch" بين البيانات الفعلية للبكسل والوسم المعلن، وهو السبب الشائع
+  // للألوان الشاحبة (washed out) وضعف التباين.
+  filters.push(`[voutraw]zscale=matrix=709:range=limited,format=yuv420p[vout]`);
 
   return filters.join(";\n");
 }
