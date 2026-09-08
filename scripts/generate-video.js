@@ -183,8 +183,8 @@ function buildFilterComplex(imageCount, durations, transitionDurations, totalDur
     }
     filters.push(
       `[${i}:v]split=2[bg${i}s][fg${i}s];` +
-      `[bg${i}s]scale=${SUPERSAMPLE}:${SUPERSAMPLE}:force_original_aspect_ratio=increase,crop=${SUPERSAMPLE}:${SUPERSAMPLE},gblur=sigma=30[bg${i}];` +
-      `[fg${i}s]scale=${SS_FG}:${SS_FG}:force_original_aspect_ratio=decrease[fg${i}];` +
+      `[bg${i}s]scale=${SUPERSAMPLE}:${SUPERSAMPLE}:force_original_aspect_ratio=increase:flags=lanczos,crop=${SUPERSAMPLE}:${SUPERSAMPLE},gblur=sigma=30[bg${i}];` +
+      `[fg${i}s]scale=${SS_FG}:${SS_FG}:force_original_aspect_ratio=decrease:flags=lanczos,unsharp=5:5:0.8:5:5:0.0,format=rgba,colorkey=white:0.20:0.12[fg${i}];` +
       `[bg${i}][fg${i}]overlay=(W-w)/2:(H-h)/2[comp${i}];` +
       `[comp${i}]zoompan=z='${zoomExpr}':x='${motion.x}':y='${motion.y}':d=${frames}:s=${WIDTH}x${HEIGHT}:fps=${FPS},setsar=1[v${i}]`
     );
@@ -305,7 +305,7 @@ async function main() {
     `-map ${localImages.length}:a`,
     `-af "volume=0.8"`,
     `-t ${safetyDuration}`,
-    `-c:v libx264 -profile:v high -preset slow -crf 16 -pix_fmt yuv420p -c:a aac -b:a 192k -movflags +faststart`,
+    `-c:v libx264 -profile:v high -preset slow -crf 14 -pix_fmt yuv420p -c:a aac -b:a 192k -movflags +faststart`,
     `"${outputPath}"`
   ].join(' ');
 
