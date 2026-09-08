@@ -294,21 +294,39 @@ async function main() {
   const outputPath = 'data/latest-video.mp4';
   const safetyDuration = (totalDuration + 0.3).toFixed(2);
 
-  const cmd = [
+  // Two-Pass Encoding بهدف بترات ثابت (6 Mbps) — آمن تحت سقف TikTok API (10 Mbps)،
+  // وممتاز لـ Instagram/Facebook، مع أعلى جودة ممكنة ضمن هذا الحجم المحدد مسبقًا
+  // البترات يُحسب ديناميكيًا حسب مدة كل فيديو، بحيث الحجم النهائي يستهدف ≈ 6MB بالضبط
+  const passLogFile = path.join(TMP_DIR, 'ffmpeg2pass');
+  const TARGET_SIZE_MB = 7.5; // محسوبة: 512MB شهريًا ÷ 60 فيديو = 8.53MB نظريًا، مع هامش أمان لباقي عمليات Make
+  const AUDIO_BITRATE_KBPS = 128; // مخفّض من 192 لترك مساحة أكبر لجودة الصورة ضمن سقف 6MB
+  const durationSec = parseFloat(safetyDuration);
+  const targetTotalBits = TARGET_SIZE_MB * 8 * 1024 * 1024 * 0.97; // هامش أمان 3% لحاوية MP4
+  const audioBits = AUDIO_BITRATE_KBPS * 1000 * durationSec;
+  const videoKbps = Math.max(300, Math.round((targetTotalBits - audioBits) / durationSec / 1000));
+  const TARGET_BITRATE = `${videoKbps}k`;
+  const MAX_BITRATE = `${Math.round(videoKbps * 1.15)}k`;
+  const BUF_SIZE = `${Math.round(videoKbps * 2)}k`;
+  console.log(`ℹ️ مدة الفيديو: ${durationSec}s → بترات فيديو مستهدف: ${videoKbps} kbps (لتحقيق ≈${TARGET_SIZE_MB}MB)`);
+
+  const commonVideoArgs = [
     'ffmpeg -y',
     imageInputs,
     `-i "${localMusic}"`,
     `-filter_complex "${filterComplex}"`,
     `-map "[vout]"`,
-    `-map ${localImages.length}:a`,
-    `-af "volume=0.8"`,
     `-t ${safetyDuration}`,
-    `-c:v libx264 -profile:v high -preset medium -tune animation -crf 16 -x264-params "aq-mode=3" -pix_fmt yuv420p -c:a aac -b:a 192k -movflags +faststart`,
-    `"${outputPath}"`
+    `-c:v libx264 -profile:v high -preset medium -tune animation -x264-params "aq-mode=3"`,
+    `-b:v ${TARGET_BITRATE} -maxrate ${MAX_BITRATE} -bufsize ${BUF_SIZE} -pix_fmt yuv420p`
   ].join(' ');
 
-  console.log('🎬 جارِ بناء الفيديو الاحترافي...');
-  execSync(cmd, { stdio: 'inherit' });
+  const pass1Cmd = `${commonVideoArgs} -an -pass 1 -passlogfile "${passLogFile}" -f null /dev/null`;
+  const pass2Cmd = `${commonVideoArgs} -map ${localImages.length}:a -af "volume=0.8" -pass 2 -passlogfile "${passLogFile}" -c:a aac -b:a ${AUDIO_BITRATE_KBPS}k -movflags +faststart "${outputPath}"`;
+
+  console.log('🎬 المرحلة 1/2: تحليل الفيديو (Pass 1)...');
+  execSync(pass1Cmd, { stdio: 'inherit' });
+  console.log('🎬 المرحلة 2/2: بناء الفيديو النهائي (Pass 2)...');
+  execSync(pass2Cmd, { stdio: 'inherit' });
   console.log(`✅ تم إنشاء الفيديو: ${outputPath}`);
 
   fs.rmSync(TMP_DIR, { recursive: true, force: true });
