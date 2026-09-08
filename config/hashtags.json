@@ -1,5 +1,6 @@
-{
+{{
   "fixed": ["#DXF", "#CNC", "#LaserCutting", "#FreeDXF", "#MasterDXF"],
+  "fixed_tiktok": ["#DXF", "#FreeDXF", "#MasterDXF"],
   "pool": [
     "#LaserCutter", "#CNCProjects", "#CNCDesign", "#CNCDesigns", "#DXFFiles",
     "#LaserCuttingProjects", "#PlasmaCutting", "#Woodworking", "#DIYProjects", "#Maker",
