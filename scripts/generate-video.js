@@ -208,7 +208,11 @@ function buildFilterComplex(imageCount, durations, transitionDurations, totalDur
   if (imageCount === 1) lastLabel = "vfinal", filters[filters.length - 1] = filters[filters.length - 1].replace('[v0]', '[vfinal]');
 
   const flashAlpha = `lt(mod(t,1.1),0.04)*0.15`;
-  filters.push(`[${lastLabel}]eq=brightness='${flashAlpha}'[vflash]`);
+  // ملاحظة حرجة: فلتر eq افتراضيًا (eval=init) يحسب المعادلة مرة واحدة فقط عند t=0 ويستعمل
+  // نفس النتيجة الثابتة طوال الفيديو! بما أن lt(mod(0,1.1),0.04)=1، كانت القيمة 0.15 تبقى
+  // ثابتة (رفع سطوع دائم) من البداية للنهاية بدل "فلاش" خفيف — وهذا كان السبب الحقيقي
+  // لشحوب الفيديو بالكامل. :eval=frame يجبره يعيد الحساب في كل فريم كما هو مقصود.
+  filters.push(`[${lastLabel}]eq=brightness='${flashAlpha}':eval=frame[vflash]`);
 
   // الواترمارك: في منتصف الإطار فوق التصميم، شفاف، بدون حدود أو ظل، مع حركة انسيابية بطيئة (drift)
   const wmDriftX = `(w-text_w)/2 + 22*sin(2*PI*t/6)`;
