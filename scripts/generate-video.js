@@ -182,7 +182,7 @@ function buildFilterComplex(imageCount, durations, transitionDurations, totalDur
     filters.push(
       `[${i}:v]split=2[bg${i}s][fg${i}s];` +
       `[bg${i}s]scale=${SUPERSAMPLE}:${SUPERSAMPLE}:force_original_aspect_ratio=increase,crop=${SUPERSAMPLE}:${SUPERSAMPLE},gblur=sigma=30[bg${i}];` +
-      `[fg${i}s]scale=${SS_FG}:${SS_FG}:force_original_aspect_ratio=decrease:flags=lanczos[fg${i}];` +
+      `[fg${i}s]scale=${SS_FG}:${SS_FG}:force_original_aspect_ratio=decrease[fg${i}];` +
       `[bg${i}][fg${i}]overlay=(W-w)/2:(H-h)/2[comp${i}];` +
       `[comp${i}]zoompan=z='${zoomExpr}':x='${motion.x}':y='${motion.y}':d=${frames}:s=${WIDTH}x${HEIGHT}:fps=${FPS},setsar=1[v${i}]`
     );
