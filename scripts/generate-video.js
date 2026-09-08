@@ -12,6 +12,7 @@ const MAX_CLIP_DURATION = 2.3;
 const MIN_TRANSITION_DURATION = 0.3;
 const MAX_TRANSITION_DURATION = 0.5;
 const WATERMARK_TEXT = "MasterDXF.com";
+const ACCENT_COLOR = "0xFFC107"; // أصفر/برتقالي لافت للكلمات المهمة (FREE, MasterDXF.com)
 const TRANSITIONS = ["zoomin", "circleopen", "radial", "distance", "smoothleft", "smoothright", "hblur", "dissolve", "wiperight", "wipeleft", "diagtl", "diagbr"];
 const HOOK_DURATION = 2.4;
 const OUTRO_DURATION = 1.8;
@@ -175,11 +176,10 @@ function buildFilterComplex(imageCount, durations, transitionDurations, totalDur
     `[${lastLabel}]eq=brightness='${flashAlpha}'[vflash]`
   );
 
-  // الواترمارك: صغير، ثابت، في الزاوية السفلية اليمنى، لا يغطي التصميم
+  // الواترمارك: بدون صندوق، ظل خفيف فقط، صغير وغير مزعج
   filters.push(
     `[vflash]drawtext=fontfile='${BOLD_FONT}':text='${WATERMARK_TEXT}':fontsize=26:fontcolor=white@0.9:` +
-    `borderw=2:bordercolor=black@0.6:` +
-    `box=1:boxcolor=black@0.45:boxborderw=8:` +
+    `borderw=2:bordercolor=black@0.55:shadowcolor=black@0.4:shadowx=1:shadowy=1:` +
     `x=w-text_w-28:y=h-th-28[vwm]`
   );
 
@@ -188,9 +188,8 @@ function buildFilterComplex(imageCount, durations, transitionDurations, totalDur
   const hookAlpha = `if(lt(t,${hookIn}),0,if(lt(t,${hookIn + 0.25}),(t-${hookIn})/0.25,if(lt(t,${hookOutStart}),1,if(lt(t,${HOOK_DURATION}),(${HOOK_DURATION}-t)/0.45,0))))`;
   const hookY = `if(lt(t,${hookIn + 0.25}),(h*0.58)-((h*0.58)-(h-th)/2)*((t-${hookIn})/0.25),(h-th)/2)`;
   filters.push(
-    `[vwm]drawtext=fontfile='${BOLD_FONT}':textfile='${HOOK_FILE}':fontsize=58:fontcolor=white:` +
-    `borderw=4:bordercolor=black:` +
-    `box=1:boxcolor=black@0.78:boxborderw=22:line_spacing=12:` +
+    `[vwm]drawtext=fontfile='${BOLD_FONT}':textfile='${HOOK_FILE}':fontsize=62:fontcolor=${ACCENT_COLOR}:` +
+    `borderw=7:bordercolor=black:shadowcolor=black@0.65:shadowx=5:shadowy=5:line_spacing=14:` +
     `x=(w-text_w)/2:y='${hookY}':` +
     `alpha='${hookAlpha}':enable='lt(t,${HOOK_DURATION})'[vhook]`
   );
@@ -201,13 +200,13 @@ function buildFilterComplex(imageCount, durations, transitionDurations, totalDur
   const outroAlpha1 = `if(lt(t,${outroStart}),0,if(lt(t,${outroStart + 0.2}),(t-${outroStart})/0.2,if(lt(t,${midPoint}),1,0)))`;
   const outroAlpha2 = `if(lt(t,${midPoint}),0,if(lt(t,${midPoint + 0.2}),(t-${midPoint})/0.2,if(lt(t,${totalDuration}),1,0)))`;
   filters.push(
-    `[vhook]drawtext=fontfile='${BOLD_FONT}':textfile='${OUTRO_FILE_1}':fontsize=54:fontcolor=white:` +
-    `borderw=4:bordercolor=black:box=1:boxcolor=black@0.8:boxborderw=20:` +
+    `[vhook]drawtext=fontfile='${BOLD_FONT}':textfile='${OUTRO_FILE_1}':fontsize=56:fontcolor=white:` +
+    `borderw=6:bordercolor=black:shadowcolor=black@0.6:shadowx=4:shadowy=4:` +
     `x=(w-text_w)/2:y=(h-text_h)/2-60:alpha='${outroAlpha1}'[vout1]`
   );
   filters.push(
-    `[vout1]drawtext=fontfile='${BOLD_FONT}':textfile='${OUTRO_FILE_2}':fontsize=50:fontcolor=white:` +
-    `borderw=4:bordercolor=black:box=1:boxcolor=black@0.8:boxborderw=20:` +
+    `[vout1]drawtext=fontfile='${BOLD_FONT}':textfile='${OUTRO_FILE_2}':fontsize=52:fontcolor=${ACCENT_COLOR}:` +
+    `borderw=6:bordercolor=black:shadowcolor=black@0.6:shadowx=4:shadowy=4:` +
     `x=(w-text_w)/2:y=(h-text_h)/2+30:alpha='${outroAlpha2}'[vout]`
   );
 
