@@ -13,7 +13,6 @@ const MIN_TRANSITION_DURATION = 0.3;
 const MAX_TRANSITION_DURATION = 0.5;
 const WATERMARK_TEXT = "MasterDXF.com";
 const ACCENT_COLOR = "0xFFC107"; // أصفر/برتقالي لافت للكلمات المهمة (FREE, MasterDXF.com)
-const FOREGROUND_FRACTION = 0.74; // نسبة مساحة التصميم من الإطار حتى يبقى كاملاً وغير مقصوص أثناء الزووم
 const TRANSITIONS = ["zoomin", "circleopen", "radial", "distance", "smoothleft", "smoothright", "hblur", "dissolve", "wiperight", "wipeleft", "diagtl", "diagbr"];
 const HOOK_DURATION = 2.4;
 const OUTRO_DURATION = 1.8;
@@ -170,9 +169,8 @@ function getMotionExpr(index, frames) {
 
 function buildFilterComplex(imageCount, durations, transitionDurations, totalDuration, hookText, fontFile) {
   const filters = [];
-  const SS_FG = evenRound(SUPERSAMPLE * FOREGROUND_FRACTION);
 
-  // لكل صورة: خلفية مموّهة تملأ الإطار بالكامل + التصميم كاملاً بدون أي قص في المقدمة، ثم حركة الكاميرا
+  // لكل صورة: عرض الصورة كاملة كما هي (بدون قص وبدون خلفية مضافة)، حواف بيضاء بسيطة إن لزم، ثم حركة الكاميرا
   for (let i = 0; i < imageCount; i++) {
     const frames = Math.round((durations[i] + (transitionDurations[i] || transitionDurations[i - 1] || 0.4)) * FPS);
     const motion = getMotionExpr(i, frames);
@@ -182,11 +180,9 @@ function buildFilterComplex(imageCount, durations, transitionDurations, totalDur
       zoomExpr = `if(lt(on,${punchFrames}),1+0.35*(on/${punchFrames}),${motion.zoom})`;
     }
     filters.push(
-      `[${i}:v]split=2[bg${i}s][fg${i}s];` +
-      `[bg${i}s]scale=${SUPERSAMPLE}:${SUPERSAMPLE}:force_original_aspect_ratio=increase:flags=lanczos,crop=${SUPERSAMPLE}:${SUPERSAMPLE},gblur=sigma=30[bg${i}];` +
-      `[fg${i}s]scale=${SS_FG}:${SS_FG}:force_original_aspect_ratio=decrease:flags=lanczos,unsharp=5:5:0.8:5:5:0.0,format=rgba,colorkey=white:0.20:0.12[fg${i}];` +
-      `[bg${i}][fg${i}]overlay=(W-w)/2:(H-h)/2[comp${i}];` +
-      `[comp${i}]zoompan=z='${zoomExpr}':x='${motion.x}':y='${motion.y}':d=${frames}:s=${WIDTH}x${HEIGHT}:fps=${FPS},setsar=1[v${i}]`
+      `[${i}:v]scale=${SUPERSAMPLE}:${SUPERSAMPLE}:force_original_aspect_ratio=decrease:flags=lanczos,` +
+      `pad=${SUPERSAMPLE}:${SUPERSAMPLE}:(ow-iw)/2:(oh-ih)/2:color=white,unsharp=5:5:0.8:5:5:0.0,` +
+      `zoompan=z='${zoomExpr}':x='${motion.x}':y='${motion.y}':d=${frames}:s=${WIDTH}x${HEIGHT}:fps=${FPS},setsar=1[v${i}]`
     );
   }
 
