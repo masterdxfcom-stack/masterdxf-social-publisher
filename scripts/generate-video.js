@@ -268,7 +268,7 @@ function buildFilterComplex(imageCount, durations, transitionDurations, totalDur
   // بدل الاعتماد على تحويل ضمني تلقائي قد لا يطابق الوسوم (metadata) اللي نحطوها فـ الترميز.
   // هادا يمنع أي "mismatch" بين البيانات الفعلية للبكسل والوسم المعلن، وهو السبب الشائع
   // للألوان الشاحبة (washed out) وضعف التباين.
-  filters.push(`[voutraw]zscale=matrix=709:range=limited,format=yuv420p[vout]`);
+  filters.push(`[voutraw]format=rgb24,zscale=matrix=709:range=limited,format=yuv420p[vout]`);
 
   return filters.join(";\n");
 }
