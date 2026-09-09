@@ -199,10 +199,11 @@ function buildFilterComplex(imageCount, durations, transitionDurations, totalDur
 
     let zoomExpr = motion.zoom;
     if (i === 0) {
-      // لقطة افتتاحية بـ"punch" خفيف: تبدأ مقرّبة شوية وتستقر بسرعة بمنحنى ناعم بدل قفزة خطية
-      const punchFrames = Math.max(Math.round(0.2 * FPS), 1);
-      const punchEase = easedFrameProgress(punchFrames);
-      zoomExpr = `if(lt(on,${punchFrames}),1+0.32*(1-${punchEase}),${motion.zoom})`;
+      // لقطة افتتاحية قوية، لكن الفريم الأول بالضبط (on=0) لازم يبقى نظيف 100% (يُستعمل غالبًا
+      // كـ"كفر/thumbnail" تلقائي من طرف المنصات). لذلك نستعمل نبضة sin: تبدأ من 0 (زووم=1، صورة
+      // كاملة نظيفة) وتوصل لأقصى قوتها فمنتصف النبضة ثم ترجع تندمج مع الحركة العادية.
+      const punchFrames = Math.max(Math.round(0.22 * FPS), 1);
+      zoomExpr = `if(lt(on,${punchFrames}),1+0.32*sin(PI*on/${punchFrames}),${motion.zoom})`;
     }
 
     filters.push(
@@ -232,8 +233,10 @@ function buildFilterComplex(imageCount, durations, transitionDurations, totalDur
   // تكرار eq. ملاحظة حرجة محفوظة من قبل: eval=frame إجباري باش تعبير الفلاش الزمني يتحسب فـ كل
   // فريم (eval=init الافتراضي كان يقفل القيمة عند t=0 ويسبب شحوب دائم فالفيديو كامل).
   const flashAlpha = `lt(mod(t,1.1),0.04)*0.15`;
-  // فلاش قوي فأول 0.18 ثانية من الفيديو كامل (إحساس "كليك الكاميرا") يعطي دخول قوي للصورة الأولى
-  const introFlash = `(1-min(t/0.18,1))*0.55`;
+  // فلاش قوي بعد بداية الفيديو مباشرة (إحساس "كليك الكاميرا")، لكن t=0 بالضبط لازم يبقى نظيف
+  // 100% بدون أي رفع سطوع (يُستعمل غالبًا كـ"كفر/thumbnail" تلقائي). نبضة sin ترتفع وتنزل
+  // بدل ما تبدا فأقصى قوتها.
+  const introFlash = `sin(PI*min(t/0.18,1))*0.5`;
   filters.push(
     `[${lastLabel}]eq=contrast=1.06:saturation=1.08:gamma=0.97:brightness='${flashAlpha}+${introFlash}':eval=frame[vgrade]`
   );
