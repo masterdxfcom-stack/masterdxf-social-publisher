@@ -9,8 +9,8 @@ const SUPERSAMPLE = WIDTH * 3;
 const FPS = 30;
 const MIN_CLIP_DURATION = 3.0;   // على الأقل 3 ثواني لكل صورة
 const MAX_CLIP_DURATION = 3.6;
-const MIN_TRANSITION_DURATION = 0.3;
-const MAX_TRANSITION_DURATION = 0.5;
+const MIN_TRANSITION_DURATION = 0.55;
+const MAX_TRANSITION_DURATION = 0.85;
 const WATERMARK_TEXT = "MasterDXF.com";
 const ACCENT_COLOR = "0xFFC107"; // أصفر/برتقالي لافت للكلمات المهمة (FREE, MasterDXF.com)
 // zoompan يستعمل خوارزمية تصغير داخلية ضعيفة الجودة ولا يقبل flags=lanczos إطلاقًا.
@@ -18,7 +18,7 @@ const ACCENT_COLOR = "0xFFC107"; // أصفر/برتقالي لافت للكلم�
 // بـ lanczos بعده يدير التصغير الحقيقي عالي الجودة.
 const ZOOMPAN_INTERMEDIATE = WIDTH * 2;
 // انتقالات مختارة بعناية (4 بدل 12) لثبات الهوية البصرية ومظهر أكثر احترافية بدل التنويع العشوائي.
-const TRANSITIONS = ["dissolve", "smoothleft", "smoothright", "zoomin"];
+const TRANSITIONS = ["zoomin", "circleopen", "hblur", "smoothleft"];
 const HOOK_DURATION = 2.4;
 const OUTRO_DURATION = 1.8;
 const BOLD_FONT = "/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf"; // fallback افتراضي
@@ -202,7 +202,7 @@ function buildFilterComplex(imageCount, durations, transitionDurations, totalDur
       // لقطة افتتاحية بـ"punch" خفيف: تبدأ مقرّبة شوية وتستقر بسرعة بمنحنى ناعم بدل قفزة خطية
       const punchFrames = Math.max(Math.round(0.2 * FPS), 1);
       const punchEase = easedFrameProgress(punchFrames);
-      zoomExpr = `if(lt(on,${punchFrames}),1+0.10*(1-${punchEase}),${motion.zoom})`;
+      zoomExpr = `if(lt(on,${punchFrames}),1+0.32*(1-${punchEase}),${motion.zoom})`;
     }
 
     filters.push(
@@ -232,8 +232,10 @@ function buildFilterComplex(imageCount, durations, transitionDurations, totalDur
   // تكرار eq. ملاحظة حرجة محفوظة من قبل: eval=frame إجباري باش تعبير الفلاش الزمني يتحسب فـ كل
   // فريم (eval=init الافتراضي كان يقفل القيمة عند t=0 ويسبب شحوب دائم فالفيديو كامل).
   const flashAlpha = `lt(mod(t,1.1),0.04)*0.15`;
+  // فلاش قوي فأول 0.18 ثانية من الفيديو كامل (إحساس "كليك الكاميرا") يعطي دخول قوي للصورة الأولى
+  const introFlash = `(1-min(t/0.18,1))*0.55`;
   filters.push(
-    `[${lastLabel}]eq=contrast=1.06:saturation=1.08:gamma=0.97:brightness='${flashAlpha}':eval=frame[vgrade]`
+    `[${lastLabel}]eq=contrast=1.06:saturation=1.08:gamma=0.97:brightness='${flashAlpha}+${introFlash}':eval=frame[vgrade]`
   );
   // فينيت خفيف (تعتيم الحواف) لإحساس سينمائي يخلي التصميم فالوسط يبرز أكثر
   filters.push(`[vgrade]vignette=PI/5[vflash]`);
@@ -345,7 +347,7 @@ async function main() {
     `-map ${localImages.length}:a`,
     `-af "volume=0.8"`,
     `-t ${safetyDuration}`,
-    `-c:v libx264 -profile:v high -preset slow -crf 16 -pix_fmt yuv420p`,
+    `-c:v libx264 -profile:v high -preset slow -crf 20 -pix_fmt yuv420p`,
     `-colorspace bt709 -color_primaries bt709 -color_trc bt709 -color_range tv`,
     `-c:a aac -b:a 192k -movflags +faststart`,
     `"${outputPath}"`
