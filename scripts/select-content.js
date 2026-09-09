@@ -104,7 +104,6 @@ function pickRandomDescription() {
   return descriptions[Math.floor(Math.random() * descriptions.length)];
 }
 
-// ⚠️ جديد: يبني هاشتاغ حسب المنصة (عدد ثابت + عدد عشوائي مختلفين لكل منصة)
 function buildHashtags(fixedList, randomCount) {
   const data = JSON.parse(fs.readFileSync('config/hashtags.json', 'utf8'));
   const pool = [...data.pool];
@@ -144,11 +143,12 @@ const musicUrl = musicResult.url;
 const description = pickRandomDescription();
 
 const hashtagData = JSON.parse(fs.readFileSync('config/hashtags.json', 'utf8'));
-const hashtagsFacebook = buildHashtags(hashtagData.fixed, 4);       // 5 ثابت + 4 عشوائي = 9
-const hashtagsTiktok = buildHashtags(hashtagData.fixed_tiktok, 2);  // 3 ثابت + 2 عشوائي = 5
+const hashtagsFacebook = buildHashtags(hashtagData.fixed, 4);
+const hashtagsTiktok = buildHashtags(hashtagData.fixed_tiktok, 2);
 
 const description_facebook = buildFullDescription(description, result.selected, hashtagsFacebook, 'facebook');
 const description_tiktok = buildFullDescription(description, result.selected, hashtagsTiktok, 'tiktok');
+const description_instagram = buildFullDescription(description, result.selected, hashtagsFacebook, 'instagram');
 
 fs.writeFileSync('data/design-tracker.json', JSON.stringify(result.newTracker, null, 2));
 fs.writeFileSync('data/music-tracker.json', JSON.stringify(musicResult.newTracker, null, 2));
@@ -158,7 +158,8 @@ const finalOutput = {
   music_url: musicUrl,
   hook_text: description,
   description_facebook,
-  description_tiktok
+  description_tiktok,
+  description_instagram
 };
 fs.writeFileSync('data/latest-output.json', JSON.stringify(finalOutput, null, 2));
 
@@ -166,6 +167,8 @@ console.log('===== FACEBOOK DESCRIPTION =====');
 console.log(description_facebook);
 console.log('\n===== TIKTOK DESCRIPTION =====');
 console.log(description_tiktok);
+console.log('\n===== INSTAGRAM DESCRIPTION =====');
+console.log(description_instagram);
 console.log('\n===== IMAGES =====');
 console.log(finalOutput.images.join('\n'));
 console.log('\n===== MUSIC =====');
