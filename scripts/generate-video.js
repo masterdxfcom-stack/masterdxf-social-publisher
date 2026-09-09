@@ -13,12 +13,12 @@ const MIN_TRANSITION_DURATION = 0.3;
 const MAX_TRANSITION_DURATION = 0.5;
 const WATERMARK_TEXT = "MasterDXF.com";
 const ACCENT_COLOR = "0xFFC107"; // أصفر/برتقالي لافت للكلمات المهمة (FREE, MasterDXF.com)
-const FOREGROUND_FRACTION = 0.74; // نسبة مساحة التصميم من الإطار حتى يبقى كاملاً وغير مقصوص أثناء الزووم
 // zoompan يستعمل خوارزمية تصغير داخلية ضعيفة الجودة ولا يقبل flags=lanczos إطلاقًا.
 // لذلك نخليه يخرج بحجم وسيط (2x الحجم النهائي) بدل الحجم النهائي مباشرة، ثم فلتر scale منفصل
 // بـ lanczos بعده يدير التصغير الحقيقي عالي الجودة.
 const ZOOMPAN_INTERMEDIATE = WIDTH * 2;
-const TRANSITIONS = ["zoomin", "circleopen", "radial", "distance", "smoothleft", "smoothright", "hblur", "dissolve", "wiperight", "wipeleft", "diagtl", "diagbr"];
+// انتقالات مختارة بعناية (4 بدل 12) لثبات الهوية البصرية ومظهر أكثر احترافية بدل التنويع العشوائي.
+const TRANSITIONS = ["dissolve", "smoothleft", "smoothright", "zoomin"];
 const HOOK_DURATION = 2.4;
 const OUTRO_DURATION = 1.8;
 const BOLD_FONT = "/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf"; // fallback افتراضي
@@ -68,8 +68,6 @@ function wrapText(text, maxCharsPerLine) {
   if (currentLine) lines.push(currentLine);
   return lines.join('\n');
 }
-
-// ===== الجزء الجديد =====
 
 function wrapLines(text, maxCharsPerLine) {
   const words = text.split(' ');
@@ -141,55 +139,78 @@ function computeTransitionDurations(imageCount, bpm) {
   return list;
 }
 
-function getMotionExpr(index, frames) {
-  const types = ['zoomIn', 'zoomOut', 'pushLeft', 'pushRight', 'pushUp', 'pushDown', 'diagonal', 'slowPan', 'fastPush', 'dynamicZoom'];
-  const type = types[index % types.length];
+// ===== حركة كاميرا سينمائية بمنحنيات ناعمة (smoothstep) بدل الحركة الخطية الروبوتية =====
+// smoothstep(p) = 3p²-2p³: يبدأ ببطء، يتسارع بالوسط، وينتهي ببطء - إحساس طبيعي بدل خطي جامد.
+function smoothstep(p) {
+  return `((${p})*(${p})*(3-2*(${p})))`;
+}
+
+function easedFrameProgress(N) {
+  return smoothstep(`(on/${N})`);
+}
+
+// يبني تعابير zoom/x/y لطبقة معينة. القيم مخفّضة عمدًا (بدل زووم قوي) لأن الصورة نفسها
+// تعمر الإطار بالكامل بدون هامش أمان (بلا خلفية مموهة) — فأي زووم قوي كان غادي يقصّي
+// الشارات اللصيقة بالحواف (FREE, DXF/DWG/SVG, masterdxf.com). هادي حركة خفيفة واضحة
+// للعين لكن كافية باش الشارات تبقى ظاهرة أغلب الوقت.
+function buildMotion(type, frames, amplitude) {
   const N = Math.max(frames - 1, 1);
+  const EASE = easedFrameProgress(N);
   switch (type) {
-    case 'zoomIn':
-      return { zoom: `min(zoom+0.0018,1.22)`, x: `iw/2-(iw/zoom/2)`, y: `ih/2-(ih/zoom/2)` };
-    case 'zoomOut':
-      return { zoom: `if(eq(on,0),1.22,max(zoom-0.0018,1.0))`, x: `iw/2-(iw/zoom/2)`, y: `ih/2-(ih/zoom/2)` };
-    case 'pushLeft':
-      return { zoom: `1.12`, x: `(iw-iw/zoom)*(1-on/${N})`, y: `ih/2-(ih/zoom/2)` };
-    case 'pushRight':
-      return { zoom: `1.12`, x: `(iw-iw/zoom)*(on/${N})`, y: `ih/2-(ih/zoom/2)` };
-    case 'pushUp':
-      return { zoom: `1.12`, x: `iw/2-(iw/zoom/2)`, y: `(ih-ih/zoom)*(1-on/${N})` };
-    case 'pushDown':
-      return { zoom: `1.12`, x: `iw/2-(iw/zoom/2)`, y: `(ih-ih/zoom)*(on/${N})` };
-    case 'diagonal':
-      return { zoom: `1.14`, x: `(iw-iw/zoom)*(on/${N})`, y: `(ih-ih/zoom)*(on/${N})` };
+    case 'zoomIn': {
+      const delta = 0.09 * amplitude;
+      return { zoom: `1+${delta}*${EASE}`, x: `iw/2-(iw/zoom/2)`, y: `ih/2-(ih/zoom/2)` };
+    }
+    case 'zoomOut': {
+      const delta = 0.08 * amplitude;
+      return { zoom: `(1+${delta})-${delta}*${EASE}`, x: `iw/2-(iw/zoom/2)`, y: `ih/2-(ih/zoom/2)` };
+    }
+    case 'pushLeft': {
+      const z = 1 + 0.05 * amplitude;
+      return { zoom: `${z}`, x: `(iw-iw/zoom)*(1-${EASE})`, y: `ih/2-(ih/zoom/2)` };
+    }
+    case 'pushRight': {
+      const z = 1 + 0.05 * amplitude;
+      return { zoom: `${z}`, x: `(iw-iw/zoom)*${EASE}`, y: `ih/2-(ih/zoom/2)` };
+    }
     case 'slowPan':
-      return { zoom: `1.06`, x: `(iw-iw/zoom)*(on/${N})`, y: `ih/2-(ih/zoom/2)` };
-    case 'fastPush':
-      return { zoom: `min(zoom+0.0045,1.28)`, x: `iw/2-(iw/zoom/2)`, y: `ih/2-(ih/zoom/2)` };
-    case 'dynamicZoom':
-    default:
-      return { zoom: `if(lt(on,${Math.round(N * 0.35)}),min(zoom+0.007,1.25),min(zoom+0.0008,1.3))`, x: `iw/2-(iw/zoom/2)`, y: `ih/2-(ih/zoom/2)` };
+    default: {
+      const z = 1 + 0.035 * amplitude;
+      return { zoom: `${z}`, x: `(iw-iw/zoom)*${EASE}`, y: `ih/2-(ih/zoom/2)+((ih-ih/zoom)*${EASE}*0.3)` };
+    }
   }
+}
+
+// تعبير تلاشي/حركة ناعم بمرور الوقت (يُستخدم للنصوص): يرجع 0..1 بمنحنى smoothstep
+// ومُقيَّد تلقائيًا (قبل start=0، بعد start+dur=1) بفضل min/max، فلا حاجة لأقواس if إضافية.
+function timeEase(tVar, start, dur) {
+  const p = `min(max((${tVar}-(${start}))/(${dur}),0),1)`;
+  return smoothstep(p);
 }
 
 function buildFilterComplex(imageCount, durations, transitionDurations, totalDuration, hookText, fontFile) {
   const filters = [];
-  const SS_FG = evenRound(SUPERSAMPLE * FOREGROUND_FRACTION);
+  const motionTypes = ['zoomIn', 'zoomOut', 'pushLeft', 'pushRight', 'slowPan'];
 
-  // لكل صورة: خلفية مموّهة تملأ الإطار بالكامل (بدون تعتيم) + التصميم كاملاً بدون أي قص في المقدمة، ثم حركة الكاميرا
-  // ملاحظة: أضفنا flags=lanczos لكل عمليات scale لتفادي فقدان التفاصيل (كانت تستعمل bilinear الافتراضي)
   for (let i = 0; i < imageCount; i++) {
     const frames = Math.round((durations[i] + (transitionDurations[i] || transitionDurations[i - 1] || 0.4)) * FPS);
-    const motion = getMotionExpr(i, frames);
+    const type = motionTypes[i % motionTypes.length];
+    const motion = buildMotion(type, frames, 1.0);
+
     let zoomExpr = motion.zoom;
     if (i === 0) {
-      const punchFrames = Math.round(0.2 * FPS);
-      zoomExpr = `if(lt(on,${punchFrames}),1+0.35*(on/${punchFrames}),${motion.zoom})`;
+      // لقطة افتتاحية بـ"punch" خفيف: تبدأ مقرّبة شوية وتستقر بسرعة بمنحنى ناعم بدل قفزة خطية
+      const punchFrames = Math.max(Math.round(0.2 * FPS), 1);
+      const punchEase = easedFrameProgress(punchFrames);
+      zoomExpr = `if(lt(on,${punchFrames}),1+0.10*(1-${punchEase}),${motion.zoom})`;
     }
+
     filters.push(
-      `[${i}:v]format=rgba,split=2[bg${i}s][fg${i}s];` +
-      `[bg${i}s]scale=${SUPERSAMPLE}:${SUPERSAMPLE}:force_original_aspect_ratio=increase:flags=lanczos+accurate_rnd+full_chroma_int,crop=${SUPERSAMPLE}:${SUPERSAMPLE},gblur=sigma=30[bg${i}];` +
-      `[fg${i}s]scale=${SS_FG}:${SS_FG}:force_original_aspect_ratio=decrease:flags=lanczos+accurate_rnd+full_chroma_int[fg${i}];` +
-      `[bg${i}][fg${i}]overlay=(W-w)/2:(H-h)/2[comp${i}];` +
-      `[comp${i}]zoompan=z='${zoomExpr}':x='${motion.x}':y='${motion.y}':d=${frames}:s=${ZOOMPAN_INTERMEDIATE}x${ZOOMPAN_INTERMEDIATE}:fps=${FPS},scale=${WIDTH}:${HEIGHT}:flags=lanczos+accurate_rnd+full_chroma_int,setsar=1[v${i}]`
+      // الصورة الأصلية (بخلفيتها اللي فيها) تعمر الإطار المربع بالكامل مباشرة وبشكل حاد،
+      // بلا أي طبقة خلفية مموهة منفصلة — بناءً على طلبك الصريح.
+      `[${i}:v]format=rgba,scale=${SUPERSAMPLE}:${SUPERSAMPLE}:force_original_aspect_ratio=increase:flags=lanczos+accurate_rnd+full_chroma_int,crop=${SUPERSAMPLE}:${SUPERSAMPLE}[img${i}raw];` +
+      `[img${i}raw]zoompan=z='${zoomExpr}':x='${motion.x}':y='${motion.y}':d=${frames}:s=${ZOOMPAN_INTERMEDIATE}x${ZOOMPAN_INTERMEDIATE}:fps=${FPS}[img${i}zp];` +
+      `[img${i}zp]scale=${WIDTH}:${HEIGHT}:flags=lanczos+accurate_rnd+full_chroma_int,setsar=1[v${i}]`
     );
   }
 
@@ -207,12 +228,15 @@ function buildFilterComplex(imageCount, durations, transitionDurations, totalDur
   }
   if (imageCount === 1) lastLabel = "vfinal", filters[filters.length - 1] = filters[filters.length - 1].replace('[v0]', '[vfinal]');
 
+  // تدرج ألوان احترافي (تباين + تشبع + جاما) مدموج مع تأثير الفلاش الخفيف فنفس الفلتر لتفادي
+  // تكرار eq. ملاحظة حرجة محفوظة من قبل: eval=frame إجباري باش تعبير الفلاش الزمني يتحسب فـ كل
+  // فريم (eval=init الافتراضي كان يقفل القيمة عند t=0 ويسبب شحوب دائم فالفيديو كامل).
   const flashAlpha = `lt(mod(t,1.1),0.04)*0.15`;
-  // ملاحظة حرجة: فلتر eq افتراضيًا (eval=init) يحسب المعادلة مرة واحدة فقط عند t=0 ويستعمل
-  // نفس النتيجة الثابتة طوال الفيديو! بما أن lt(mod(0,1.1),0.04)=1، كانت القيمة 0.15 تبقى
-  // ثابتة (رفع سطوع دائم) من البداية للنهاية بدل "فلاش" خفيف — وهذا كان السبب الحقيقي
-  // لشحوب الفيديو بالكامل. :eval=frame يجبره يعيد الحساب في كل فريم كما هو مقصود.
-  filters.push(`[${lastLabel}]eq=brightness='${flashAlpha}':eval=frame[vflash]`);
+  filters.push(
+    `[${lastLabel}]eq=contrast=1.06:saturation=1.08:gamma=0.97:brightness='${flashAlpha}':eval=frame[vgrade]`
+  );
+  // فينيت خفيف (تعتيم الحواف) لإحساس سينمائي يخلي التصميم فالوسط يبرز أكثر
+  filters.push(`[vgrade]vignette=PI/5[vflash]`);
 
   // الواترمارك: في منتصف الإطار فوق التصميم، شفاف، بدون حدود أو ظل، مع حركة انسيابية بطيئة (drift)
   const wmDriftX = `(w-text_w)/2 + 22*sin(2*PI*t/6)`;
@@ -235,8 +259,11 @@ function buildFilterComplex(imageCount, durations, transitionDurations, totalDur
 
   const hookIn = 0.15;
   const hookOutStart = HOOK_DURATION - 0.45;
-  const hookAlpha = `if(lt(t,${hookIn}),0,if(lt(t,${hookIn + 0.25}),(t-${hookIn})/0.25,if(lt(t,${hookOutStart}),1,if(lt(t,${HOOK_DURATION}),(${HOOK_DURATION}-t)/0.45,0))))`;
-  const hookCenterY = `if(lt(t,${hookIn + 0.25}),(h*0.58)-((h*0.58)-(h*0.5))*((t-${hookIn})/0.25),h*0.5)`;
+  // حركة/تلاشي ناعمين بمنحنى smoothstep بدل الانتقال الخطي الجامد
+  const hookEaseIn = timeEase('t', hookIn, 0.25);
+  const hookEaseOut = timeEase('t', hookOutStart, HOOK_DURATION - hookOutStart);
+  const hookAlpha = `if(lt(t,${hookOutStart}),${hookEaseIn},1-${hookEaseOut})`;
+  const hookCenterY = `h*0.5+(h*0.08)*(1-${hookEaseIn})`;
 
   let lastLabel2 = "vwm";
   hookLines.forEach((line, idx) => {
@@ -255,8 +282,8 @@ function buildFilterComplex(imageCount, durations, transitionDurations, totalDur
 
   const outroStart = totalDuration - OUTRO_DURATION;
   const midPoint = outroStart + OUTRO_DURATION * 0.5;
-  const outroAlpha1 = `if(lt(t,${outroStart}),0,if(lt(t,${outroStart + 0.2}),(t-${outroStart})/0.2,if(lt(t,${midPoint}),1,0)))`;
-  const outroAlpha2 = `if(lt(t,${midPoint}),0,if(lt(t,${midPoint + 0.2}),(t-${midPoint})/0.2,if(lt(t,${totalDuration}),1,0)))`;
+  const outroAlpha1 = timeEase('t', outroStart, 0.25);
+  const outroAlpha2 = timeEase('t', midPoint, 0.25);
   filters.push(
     `[${lastLabel2}]drawtext=fontfile='${fontFile}':textfile='${OUTRO_FILE_1}':fontsize=56:fontcolor=white:` +
     `borderw=6:bordercolor=black:shadowcolor=black@0.6:shadowx=4:shadowy=4:` +
@@ -268,10 +295,9 @@ function buildFilterComplex(imageCount, durations, transitionDurations, totalDur
     `x=(w-text_w)/2:y=(h-text_h)/2+30:alpha='${outroAlpha2}'[voutraw]`
   );
 
-  // تحويل صريح ودقيق من RGB (full range) إلى YUV420p (limited range, BT.709) باستعمال zscale
-  // بدل الاعتماد على تحويل ضمني تلقائي قد لا يطابق الوسوم (metadata) اللي نحطوها فـ الترميز.
-  // هادا يمنع أي "mismatch" بين البيانات الفعلية للبكسل والوسم المعلن، وهو السبب الشائع
-  // للألوان الشاحبة (washed out) وضعف التباين.
+  // تحويل صريح ودقيق من RGB (full range) إلى YUV420p (limited range, BT.709) باستعمال zscale.
+  // ملاحظة: zscale (مكتبة zimg) قد يفشل بخطأ "no path between colorspaces" إذا كانت الصورة
+  // لا تزال بصيغة rgba (فيها قناة alpha)، لذلك نحوّلها إلى rgb24 أولاً.
   filters.push(`[voutraw]format=rgb24,zscale=matrix=709:range=limited,format=yuv420p[vout]`);
 
   return filters.join(";\n");
@@ -309,12 +335,6 @@ async function main() {
   const outputPath = 'data/latest-video.mp4';
   const safetyDuration = (totalDuration + 0.3).toFixed(2);
 
-  // ملاحظات على التعديلات:
-  // 1) -sws_flags lanczos+accurate_rnd+full_chroma_int : يفرض خوارزمية تصغير/تكبير عالية الجودة على
-  //    كل عمليات scale الداخلية بما فيها zoompan، فيقل فقدان التفاصيل (كان سبب الصورة "الطرية").
-  // 2) -colorspace/-color_primaries/-color_trc bt709 + -color_range tv : يثبّت الـ metadata الخاصة
-  //    بمساحة الألوان في الفيديو الناتج، فيتفادى تفسير الأسود كرمادي (washed out black) على بعض
-  //    المشغلات (منصات الموبايل، يوتيوب شورتس، إلخ) التي كانت تخمّن نطاق الألوان بشكل خاطئ.
   const cmd = [
     'ffmpeg -y',
     '-sws_flags lanczos+accurate_rnd+full_chroma_int',
