@@ -7,24 +7,35 @@ const WIDTH = 1080;
 const HEIGHT = 1080;
 const SUPERSAMPLE = WIDTH * 3;
 const FPS = 30;
-const MIN_CLIP_DURATION = 3.0;   // على الأقل 3 ثواني لكل صورة
-const MAX_CLIP_DURATION = 3.6;
+const MIN_CLIP_DURATION = 2.5;   // قُلّلت قليلاً بناءً على طلبك (كانت 3.0)
+const MAX_CLIP_DURATION = 3.0;   // قُلّلت قليلاً بناءً على طلبك (كانت 3.6)
 const MIN_TRANSITION_DURATION = 0.55;
 const MAX_TRANSITION_DURATION = 0.85;
 const WATERMARK_TEXT = "MasterDXF.com";
 const ACCENT_COLOR = "0xFFC107"; // أصفر/برتقالي لافت للكلمات المهمة (FREE, MasterDXF.com)
+const FOLLOW_COLOR = "0x00E676"; // أخضر زاهٍ جذاب لعبارة "تابعونا" (يتماشى مع لون شارة FREE بالتصاميم)
 // zoompan يستعمل خوارزمية تصغير داخلية ضعيفة الجودة ولا يقبل flags=lanczos إطلاقًا.
 // لذلك نخليه يخرج بحجم وسيط (2x الحجم النهائي) بدل الحجم النهائي مباشرة، ثم فلتر scale منفصل
 // بـ lanczos بعده يدير التصغير الحقيقي عالي الجودة.
 const ZOOMPAN_INTERMEDIATE = WIDTH * 2;
-// انتقالات مختارة بعناية (4 بدل 12) لثبات الهوية البصرية ومظهر أكثر احترافية بدل التنويع العشوائي.
-const TRANSITIONS = ["zoomin", "circleopen", "hblur", "smoothleft"];
+// مجموعة أوسع من الانتقالات المميزة بصريًا عن بعضها (8 بدل 4) — تُخلط عشوائيًا في كل فيديو
+// وتُوزّع بلا أي تكرار (طالما عدد الانتقالات المطلوبة ≤ 8)، فلا يظهر نفس الانتقال مرتين.
+const TRANSITIONS = ["zoomin", "circleopen", "hblur", "smoothleft", "radial", "distance", "wiperight", "diagtr"];
 const HOOK_DURATION = 2.4;
-const OUTRO_DURATION = 1.8;
+const OUTRO_DURATION = 2.3; // زيدت من 1.8 لإفساح وقت كافٍ لظهور سطر ثالث ("تابعونا") بتتابع مريح
 const BOLD_FONT = "/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf"; // fallback افتراضي
 const TMP_DIR = "tmp_video_build";
 const OUTRO_FILE_1 = path.join(TMP_DIR, "outro_text_1.txt");
 const OUTRO_FILE_2 = path.join(TMP_DIR, "outro_text_2.txt");
+
+// ===== إعدادات تأثير الدوامة الحقيقية (Vortex/Swirl) على الصورة الأولى (دخول الفيديو) =====
+// التواء تفاضلي حسب نصف القطر (geq): المركز يلتف بأقصى قوة، والالتفاف يخفت تدريجيًا كلما ابتعدنا
+// عنه حتى يصبح صفرًا تمامًا عند محيط الدائرة المحاطة بالمربع (RMAX) — بعكس تدوير الكتلة كاملة،
+// هذا النهج لا يحتاج أي تكبير إضافي أو حيل محاذاة: نقطة العيّنة تبقى دائمًا بنفس نصف القطر (فقط
+// بزاوية مختلفة)، وبما أن RMAX = نصف أصغر بُعد فهي دائمًا ضمن حدود الصورة — صفر فراغات دائمًا
+// مهما كانت شدة الالتفاف.
+const SPIN_DURATION = 0.9;      // مدة تأثير الدوامة بالثواني (زيدت من 0.7 بناءً على طلبك)
+const SWIRL_STRENGTH_MAX = 7;   // أقصى زاوية التفاف إضافية بالمركز (راديان) — قوة الدوامة
 
 // ===== دوال التحميل الأصلية — لم يتم تغيير أي شيء فيها =====
 function downloadFile(url, destPath) {
@@ -103,6 +114,8 @@ function pickFont() {
   }
   return BOLD_FONT;
 }
+
+
 
 function computeClipDurations(imageCount, bpm) {
   const durations = [];
@@ -192,6 +205,23 @@ function buildFilterComplex(imageCount, durations, transitionDurations, totalDur
   const filters = [];
   const motionTypes = ['zoomIn', 'zoomOut', 'pushLeft', 'pushRight', 'slowPan'];
 
+  // خلط عشوائي لمجموعة الانتقالات مرة واحدة لكل فيديو، ثم توزيعها بالترتيب بلا تكرار
+  // (طالما عدد الانتقالات المطلوبة ≤ طول القائمة). إذا احتجنا أكثر من الطول، نعيد الخلط
+  // لدورة جديدة بدل التدوير الثابت بـ % الذي كان يكرر نفس الترتيب في كل فيديو.
+  function shuffledTransitions(count) {
+    const result = [];
+    while (result.length < count) {
+      const pool = [...TRANSITIONS];
+      for (let k = pool.length - 1; k > 0; k--) {
+        const j = Math.floor(Math.random() * (k + 1));
+        [pool[k], pool[j]] = [pool[j], pool[k]];
+      }
+      result.push(...pool);
+    }
+    return result.slice(0, count);
+  }
+  const transitionOrder = shuffledTransitions(Math.max(imageCount - 1, 0));
+
   for (let i = 0; i < imageCount; i++) {
     const frames = Math.round((durations[i] + (transitionDurations[i] || transitionDurations[i - 1] || 0.4)) * FPS);
     const type = motionTypes[i % motionTypes.length];
@@ -210,15 +240,42 @@ function buildFilterComplex(imageCount, durations, transitionDurations, totalDur
       // الصورة الأصلية (بخلفيتها اللي فيها) تعمر الإطار المربع بالكامل مباشرة وبشكل حاد،
       // بلا أي طبقة خلفية مموهة منفصلة — بناءً على طلبك الصريح.
       `[${i}:v]format=rgba,scale=${SUPERSAMPLE}:${SUPERSAMPLE}:force_original_aspect_ratio=increase:flags=lanczos+accurate_rnd+full_chroma_int,crop=${SUPERSAMPLE}:${SUPERSAMPLE}[img${i}raw];` +
-      `[img${i}raw]zoompan=z='${zoomExpr}':x='${motion.x}':y='${motion.y}':d=${frames}:s=${ZOOMPAN_INTERMEDIATE}x${ZOOMPAN_INTERMEDIATE}:fps=${FPS}[img${i}zp];` +
-      `[img${i}zp]scale=${WIDTH}:${HEIGHT}:flags=lanczos+accurate_rnd+full_chroma_int,setsar=1[v${i}]`
+      `[img${i}raw]zoompan=z='${zoomExpr}':x='${motion.x}':y='${motion.y}':d=${frames}:s=${ZOOMPAN_INTERMEDIATE}x${ZOOMPAN_INTERMEDIATE}:fps=${FPS}[img${i}zp]`
     );
+
+    if (i === 0) {
+      // ===== دوامة حقيقية (Vortex/Swirl) على الصورة الأولى فقط =====
+      // القوة (T=الزمن بالثواني) تبدأ من صفر تمامًا عند t=0 (فريم نظيف)، ترتفع بمنحنى sin
+      // لذروتها في منتصف SPIN_DURATION، ثم تعود لصفر تمامًا عند نهايتها — فلا حاجة لأي محاذاة
+      // أو حيلة تكبير، والصورة تعود لوضعها الطبيعي 100% تلقائيًا بعد انتهاء المدة.
+      const swirlHump = `sin(PI*min(T/${SPIN_DURATION},1))`;
+      const cx = `((W-1)/2)`;
+      const cy = `((H-1)/2)`;
+      const rExpr = `hypot(X-${cx},Y-${cy})`;
+      const rmax = `(min(W,H)/2)`;
+      // fac يخفت من 1 بالمركز إلى 0 عند محيط الدائرة المحاطة بالمربع — يضمن بقاء نقطة العيّنة
+      // دائمًا ضمن حدود الصورة (بما أن نصف القطر R لا يتغير، فقط الزاوية) مهما كانت شدة الالتفاف.
+      const fac = `max(0,1-${rExpr}/${rmax})`;
+      const theta = `(atan2(Y-${cy},X-${cx})+${SWIRL_STRENGTH_MAX}*${swirlHump}*${fac})`;
+      const sx = `(${cx}+${rExpr}*cos(${theta}))`;
+      const sy = `(${cy}+${rExpr}*sin(${theta}))`;
+      const swirlExpr = `p(${sx},${sy})`;
+
+      filters.push(
+        `[img0zp]scale=${WIDTH}:${HEIGHT}:flags=lanczos+accurate_rnd+full_chroma_int,setsar=1,format=rgb24[v0rgb];` +
+        `[v0rgb]geq=r='${swirlExpr}':g='${swirlExpr}':b='${swirlExpr}':interpolation=bilinear:enable='lt(t\\,${SPIN_DURATION})',format=rgba[v0]`
+      );
+    } else {
+      filters.push(
+        `[img${i}zp]scale=${WIDTH}:${HEIGHT}:flags=lanczos+accurate_rnd+full_chroma_int,setsar=1[v${i}]`
+      );
+    }
   }
 
   let lastLabel = "v0";
   let cumulativeOffset = durations[0];
   for (let i = 1; i < imageCount; i++) {
-    const transitionName = TRANSITIONS[(i - 1) % TRANSITIONS.length];
+    const transitionName = transitionOrder[i - 1];
     const tDur = transitionDurations[i - 1];
     const outLabel = i === imageCount - 1 ? "vfinal" : `vx${i}`;
     filters.push(
@@ -229,16 +286,16 @@ function buildFilterComplex(imageCount, durations, transitionDurations, totalDur
   }
   if (imageCount === 1) lastLabel = "vfinal", filters[filters.length - 1] = filters[filters.length - 1].replace('[v0]', '[vfinal]');
 
-  // تدرج ألوان احترافي (تباين + تشبع + جاما) مدموج مع تأثير الفلاش الخفيف فنفس الفلتر لتفادي
+  // تدرج ألوان احترافي (تباين + تشبع + جاما) مدموج مع فلاش الافتتاح الواحد فنفس الفلتر لتفادي
   // تكرار eq. ملاحظة حرجة محفوظة من قبل: eval=frame إجباري باش تعبير الفلاش الزمني يتحسب فـ كل
   // فريم (eval=init الافتراضي كان يقفل القيمة عند t=0 ويسبب شحوب دائم فالفيديو كامل).
-  const flashAlpha = `lt(mod(t,1.1),0.04)*0.15`;
+  // الترميش المتكرر (نبضة كل 1.1 ثانية طوال الفيديو) تم إزالته بناءً على طلبك.
   // فلاش قوي بعد بداية الفيديو مباشرة (إحساس "كليك الكاميرا")، لكن t=0 بالضبط لازم يبقى نظيف
   // 100% بدون أي رفع سطوع (يُستعمل غالبًا كـ"كفر/thumbnail" تلقائي). نبضة sin ترتفع وتنزل
   // بدل ما تبدا فأقصى قوتها.
   const introFlash = `sin(PI*min(t/0.18,1))*0.5`;
   filters.push(
-    `[${lastLabel}]eq=contrast=1.06:saturation=1.08:gamma=0.97:brightness='${flashAlpha}+${introFlash}':eval=frame[vflash]`
+    `[${lastLabel}]eq=contrast=1.06:saturation=1.08:gamma=0.97:brightness='${introFlash}':eval=frame[vflash]`
   );
 
   // الواترمارك: في منتصف الإطار فوق التصميم، شفاف، بدون حدود أو ظل، مع حركة انسيابية بطيئة (drift)
@@ -284,24 +341,51 @@ function buildFilterComplex(imageCount, durations, transitionDurations, totalDur
   });
 
   const outroStart = totalDuration - OUTRO_DURATION;
-  const midPoint = outroStart + OUTRO_DURATION * 0.5;
-  const outroAlpha1 = timeEase('t', outroStart, 0.25);
-  const outroAlpha2 = timeEase('t', midPoint, 0.25);
+  // ثلاث بدايات متتابعة (تتابع لطيف بدل ظهور كل شيء دفعة واحدة): العنوان، ثم masterdxf.com،
+  // ثم "تابعونا" تحته أخيرًا.
+  const start1 = outroStart;
+  const start2 = outroStart + 0.4;
+  const start3 = outroStart + 0.8;
+  const outroAlpha1 = timeEase('t', start1, 0.25);
+  const outroAlpha2 = timeEase('t', start2, 0.25);
   filters.push(
     `[${lastLabel2}]drawtext=fontfile='${fontFile}':textfile='${OUTRO_FILE_1}':fontsize=56:fontcolor=white:` +
     `borderw=6:bordercolor=black:shadowcolor=black@0.6:shadowx=4:shadowy=4:` +
-    `x=(w-text_w)/2:y=(h-text_h)/2-60:alpha='${outroAlpha1}'[vout1]`
+    `x=(w-text_w)/2:y=(h-text_h)/2-90:alpha='${outroAlpha1}'[vout1]`
   );
   filters.push(
     `[vout1]drawtext=fontfile='${fontFile}':textfile='${OUTRO_FILE_2}':fontsize=52:fontcolor=${ACCENT_COLOR}:` +
     `borderw=6:bordercolor=black:shadowcolor=black@0.6:shadowx=4:shadowy=4:` +
-    `x=(w-text_w)/2:y=(h-text_h)/2+30:alpha='${outroAlpha2}'[voutraw]`
+    `x=(w-text_w)/2:y=(h-text_h)/2:alpha='${outroAlpha2}'[vout2]`
   );
+  // "FOLLOW US" بتأثير كتابة حقيقي (حرف بحرف) بدل fade بسيط — نبني drawtext منفصل لكل بادئة
+  // نصية متزايدة (F, FO, FOL, ...) ويُفعَّل كل واحد فقط خلال شريحته الزمنية الخاصة عبر enable.
+  const followText = "FOLLOW US";
+  const TYPE_DURATION = 0.7; // مدة الكتابة الكاملة بالثواني
+  const stepDur = TYPE_DURATION / followText.length;
+  let lastLabel3 = "vout2";
+  for (let c = 1; c <= followText.length; c++) {
+    const substr = followText.slice(0, c);
+    const stepFile = path.join(TMP_DIR, `follow_step_${c}.txt`);
+    fs.writeFileSync(stepFile, substr);
+    const stepStart = (start3 + (c - 1) * stepDur).toFixed(3);
+    const isLast = c === followText.length;
+    const outLbl = isLast ? "vout3" : `vfw${c}`;
+    const enableExpr = isLast
+      ? `gte(t\\,${stepStart})`
+      : `between(t\\,${stepStart}\\,${(start3 + c * stepDur).toFixed(3)})`;
+    filters.push(
+      `[${lastLabel3}]drawtext=fontfile='${fontFile}':textfile='${stepFile}':fontsize=50:fontcolor=${FOLLOW_COLOR}:` +
+      `borderw=6:bordercolor=black:shadowcolor=black@0.6:shadowx=4:shadowy=4:` +
+      `x=(w-text_w)/2:y=(h-text_h)/2+85:enable='${enableExpr}'[${outLbl}]`
+    );
+    lastLabel3 = outLbl;
+  }
 
   // تحويل صريح ودقيق من RGB (full range) إلى YUV420p (limited range, BT.709) باستعمال zscale.
   // ملاحظة: zscale (مكتبة zimg) قد يفشل بخطأ "no path between colorspaces" إذا كانت الصورة
   // لا تزال بصيغة rgba (فيها قناة alpha)، لذلك نحوّلها إلى rgb24 أولاً.
-  filters.push(`[voutraw]format=rgb24,zscale=matrix=709:range=limited,format=yuv420p[vout]`);
+  filters.push(`[${lastLabel3}]format=rgb24,zscale=matrix=709:range=limited,format=yuv420p[vout]`);
 
   return filters.join(";\n");
 }
