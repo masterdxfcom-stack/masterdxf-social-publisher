@@ -485,9 +485,13 @@ async function main() {
     `-map ${localImages.length}:a`,
     `-af "volume=0.8"`,
     `-t ${safetyDuration}`,
-    `-c:v libx264 -profile:v high -preset slow -crf 18 -pix_fmt yuv420p`,
+    // [تعديل] ضغط أفضل بنفس الجودة المرئية تقريبًا: crf 21 بدل 18 (near-lossless مبالغ فيه
+    // لمحتوى line-art)، preset slower بدل slow لكفاءة ضغط أعلى، وtune=animation لأن المحتوى
+    // عبارة عن رسومات مسطحة الألوان بحواف حادة (بالضبط ما هو مصمم له هذا الـtune).
+    `-c:v libx264 -profile:v high -preset slower -crf 21 -tune animation -pix_fmt yuv420p`,
     `-colorspace bt709 -color_primaries bt709 -color_trc bt709 -color_range tv`,
-    `-c:a aac -b:a 192k -movflags +faststart`,
+    // [تعديل] 128k كافية جدًا لموسيقى خلفية (بدل 192k) بدون فرق مسموع يُذكر
+    `-c:a aac -b:a 128k -movflags +faststart`,
     `"${outputPath}"`
   ].join(' ');
 
