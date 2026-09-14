@@ -12,8 +12,13 @@ const MAX_CLIP_DURATION = 3.0;   // قُلّلت قليلاً بناءً على 
 const MIN_TRANSITION_DURATION = 0.55;
 const MAX_TRANSITION_DURATION = 0.85;
 const WATERMARK_TEXT = "MasterDXF.com";
-const ACCENT_COLOR = "0xFFC107"; // أصفر/برتقالي لافت للكلمات المهمة (FREE, MasterDXF.com)
-const FOLLOW_COLOR = "0x00E676"; // أخضر زاهٍ جذاب لعبارة "تابعونا" (يتماشى مع لون شارة FREE بالتصاميم)
+
+// ===== [تعديل] مجموعات ألوان عشوائية بدل لون ثابت — تُختار مرة واحدة لكل فيديو =====
+const ACCENT_PALETTE = ["0xFFC107", "0xFF7043", "0xFFEB3B", "0xFF5252", "0xFFA726"];
+const FOLLOW_PALETTE = ["0x00E676", "0x1DE9B6", "0x64DD17", "0x00E5FF"];
+const ACCENT_COLOR = ACCENT_PALETTE[Math.floor(Math.random() * ACCENT_PALETTE.length)];
+const FOLLOW_COLOR = FOLLOW_PALETTE[Math.floor(Math.random() * FOLLOW_PALETTE.length)];
+
 // zoompan يستعمل خوارزمية تصغير داخلية ضعيفة الجودة ولا يقبل flags=lanczos إطلاقًا.
 // لذلك نخليه يخرج بحجم وسيط (2x الحجم النهائي) بدل الحجم النهائي مباشرة، ثم فلتر scale منفصل
 // بـ lanczos بعده يدير التصغير الحقيقي عالي الجودة.
@@ -29,13 +34,13 @@ const OUTRO_FILE_1 = path.join(TMP_DIR, "outro_text_1.txt");
 const OUTRO_FILE_2 = path.join(TMP_DIR, "outro_text_2.txt");
 
 // ===== إعدادات تأثير الدوامة الحقيقية (Vortex/Swirl) على الصورة الأولى (دخول الفيديو) =====
-// التواء تفاضلي حسب نصف القطر (geq): المركز يلتف بأقصى قوة، والالتفاف يخفت تدريجيًا كلما ابتعدنا
-// عنه حتى يصبح صفرًا تمامًا عند محيط الدائرة المحاطة بالمربع (RMAX) — بعكس تدوير الكتلة كاملة،
-// هذا النهج لا يحتاج أي تكبير إضافي أو حيل محاذاة: نقطة العيّنة تبقى دائمًا بنفس نصف القطر (فقط
-// بزاوية مختلفة)، وبما أن RMAX = نصف أصغر بُعد فهي دائمًا ضمن حدود الصورة — صفر فراغات دائمًا
-// مهما كانت شدة الالتفاف.
-const SPIN_DURATION = 0.9;      // مدة تأثير الدوامة بالثواني (زيدت من 0.7 بناءً على طلبك)
-const SWIRL_STRENGTH_MAX = 7;   // أقصى زاوية التفاف إضافية بالمركز (راديان) — قوة الدوامة
+// [تعديل] قوة ومدة الدوامة تُصادف عشوائيًا في نطاق ضيق لكل فيديو (بدل قيمة ثابتة دائمًا)
+// باش البصمة البصرية للقطة الافتتاحية تختلف بين نسخة وأخرى.
+const SPIN_DURATION = Number((0.7 + Math.random() * 0.4).toFixed(3));   // بين 0.7 و1.1 ثانية
+// [تعديل] نطاق أوسع لقوة الدوامة (4 إلى 10 بدل 5 إلى 8) + اتجاه عشوائي (مع/عكس عقارب الساعة)
+// عبر إشارة عشوائية — يضاعف عدد التركيبات البصرية الممكنة للقطة الافتتاحية.
+const SWIRL_DIRECTION = Math.random() < 0.5 ? 1 : -1;
+const SWIRL_STRENGTH_MAX = Number((4 + Math.random() * 6).toFixed(3)) * SWIRL_DIRECTION; // بين 4 و10 راديان، باتجاه عشوائي
 
 // ===== دوال التحميل الأصلية — لم يتم تغيير أي شيء فيها =====
 function downloadFile(url, destPath) {
@@ -115,8 +120,6 @@ function pickFont() {
   return BOLD_FONT;
 }
 
-
-
 function computeClipDurations(imageCount, bpm) {
   const durations = [];
   for (let i = 0; i < imageCount; i++) {
@@ -128,6 +131,10 @@ function computeClipDurations(imageCount, bpm) {
     } else {
       const wave = (Math.sin(i * 1.7) + 1) / 2;
       d = MIN_CLIP_DURATION + wave * (MAX_CLIP_DURATION - MIN_CLIP_DURATION);
+      // [تعديل] jitter عشوائي بسيط (±0.1s) على المقاطع الوسطى فقط — يغيّر طول كل مقطع
+      // بشكل طفيف بين نسخة وأخرى بدون كسر إحساس الإيقاع العام.
+      d += (Math.random() - 0.5) * 0.2;
+      d = Math.min(MAX_CLIP_DURATION, Math.max(MIN_CLIP_DURATION, d));
     }
     if (bpm && bpm > 0) {
       const beat = 60 / bpm;
@@ -160,6 +167,22 @@ function smoothstep(p) {
 
 function easedFrameProgress(N) {
   return smoothstep(`(on/${N})`);
+}
+
+// [تعديل] اختيار نوع الحركة عشوائيًا لكل مقطع (بدل التوزيع الثابت i % motionTypes.length)،
+// مع تفادي تكرار نفس الحركة مرتين متتاليتين حتى يبقى التنوع البصري ملموسًا.
+function pickMotionSequence(count) {
+  const types = ['zoomIn', 'zoomOut', 'pushLeft', 'pushRight', 'slowPan'];
+  const seq = [];
+  let last = null;
+  for (let i = 0; i < count; i++) {
+    let choice;
+    do { choice = types[Math.floor(Math.random() * types.length)]; }
+    while (choice === last && types.length > 1);
+    seq.push(choice);
+    last = choice;
+  }
+  return seq;
 }
 
 // يبني تعابير zoom/x/y لطبقة معينة. القيم مخفّضة عمدًا (بدل زووم قوي) لأن الصورة نفسها
@@ -203,7 +226,9 @@ function timeEase(tVar, start, dur) {
 
 function buildFilterComplex(imageCount, durations, transitionDurations, totalDuration, hookText, fontFile) {
   const filters = [];
-  const motionTypes = ['zoomIn', 'zoomOut', 'pushLeft', 'pushRight', 'slowPan'];
+
+  // [تعديل] تسلسل حركة عشوائي لكل فيديو (بدل motionTypes[i % motionTypes.length] الثابت)
+  const motionSequence = pickMotionSequence(imageCount);
 
   // خلط عشوائي لمجموعة الانتقالات مرة واحدة لكل فيديو، ثم توزيعها بالترتيب بلا تكرار
   // (طالما عدد الانتقالات المطلوبة ≤ طول القائمة). إذا احتجنا أكثر من الطول، نعيد الخلط
@@ -224,16 +249,24 @@ function buildFilterComplex(imageCount, durations, transitionDurations, totalDur
 
   for (let i = 0; i < imageCount; i++) {
     const frames = Math.round((durations[i] + (transitionDurations[i] || transitionDurations[i - 1] || 0.4)) * FPS);
-    const type = motionTypes[i % motionTypes.length];
-    const motion = buildMotion(type, frames, 1.0);
+    const type = motionSequence[i];
+    // [تعديل] شدة الزووم/الحركة (amplitude) عشوائية لكل مقطع، نطاق أوسع من قبل (0.75 إلى 1.6
+    // بدل 0.85 إلى 1.2) — تنويع أقوى وأوضح بصريًا في مسار البكسلات بين نسخة وأخرى من نفس الفيديو.
+    const amplitude = Number((0.75 + Math.random() * 0.85).toFixed(3));
+    const motion = buildMotion(type, frames, amplitude);
 
     let zoomExpr = motion.zoom;
     if (i === 0) {
       // لقطة افتتاحية قوية، لكن الفريم الأول بالضبط (on=0) لازم يبقى نظيف 100% (يُستعمل غالبًا
       // كـ"كفر/thumbnail" تلقائي من طرف المنصات). لذلك نستعمل نبضة sin: تبدأ من 0 (زووم=1، صورة
       // كاملة نظيفة) وتوصل لأقصى قوتها فمنتصف النبضة ثم ترجع تندمج مع الحركة العادية.
-      const punchFrames = Math.max(Math.round(0.22 * FPS), 1);
-      zoomExpr = `if(lt(on,${punchFrames}),1+0.32*sin(PI*on/${punchFrames}),${motion.zoom})`;
+      // [تعديل] قوة ومدة النبضة عشوائيتان لكل فيديو (بدل 0.32 و0.22s ثابتتين) — دخول "أقوى"
+      // ومتنوع في كل مرة. الأمان محفوظ رياضيًا: sin(PI*on/punchFrames) = 0 بالضبط عند on=0
+      // مهما كانت قوة النبضة (punchStrength)، فالفريم الأول يبقى نظيفًا 100% دائمًا.
+      const punchStrength = (0.28 + Math.random() * 0.22).toFixed(3); // بين 0.28 و0.5
+      const punchSeconds = 0.16 + Math.random() * 0.14;               // بين 0.16 و0.30 ثانية
+      const punchFrames = Math.max(Math.round(punchSeconds * FPS), 1);
+      zoomExpr = `if(lt(on,${punchFrames}),1+${punchStrength}*sin(PI*on/${punchFrames}),${motion.zoom})`;
     }
 
     filters.push(
@@ -293,14 +326,30 @@ function buildFilterComplex(imageCount, durations, transitionDurations, totalDur
   // فلاش قوي بعد بداية الفيديو مباشرة (إحساس "كليك الكاميرا")، لكن t=0 بالضبط لازم يبقى نظيف
   // 100% بدون أي رفع سطوع (يُستعمل غالبًا كـ"كفر/thumbnail" تلقائي). نبضة sin ترتفع وتنزل
   // بدل ما تبدا فأقصى قوتها.
-  const introFlash = `sin(PI*min(t/0.18,1))*0.5`;
+  // [تعديل] نطاق أوسع لمدة وذروة الفلاش (بدل نطاق ضيق سابق) — إحساس "كليك كاميرا" أقوى
+  // وأكثر تنوعًا بين الفيديوهات. الأمان محفوظ: sin(PI*min(t/flashDur,1)) = 0 بالضبط عند t=0.
+  const flashDur = (0.12 + Math.random() * 0.12).toFixed(3);  // بين 0.12 و0.24 ثانية
+  const flashPeak = (0.30 + Math.random() * 0.40).toFixed(3); // بين 0.30 و0.70
+  const introFlash = `sin(PI*min(t/${flashDur},1))*${flashPeak}`;
+
+  // [تعديل] قيم تدرج الألوان (contrast/saturation/gamma) عشوائية ضمن نطاق ضيق لكل فيديو
+  const contrastVal = (1.03 + Math.random() * 0.08).toFixed(3);
+  const saturationVal = (1.04 + Math.random() * 0.1).toFixed(3);
+  const gammaVal = (0.95 + Math.random() * 0.05).toFixed(3);
+
   filters.push(
-    `[${lastLabel}]eq=contrast=1.06:saturation=1.08:gamma=0.97:brightness='${introFlash}':eval=frame[vflash]`
+    `[${lastLabel}]eq=contrast=${contrastVal}:saturation=${saturationVal}:gamma=${gammaVal}:brightness='${introFlash}':eval=frame[vflash]`
   );
 
   // الواترمارك: في منتصف الإطار فوق التصميم، شفاف، بدون حدود أو ظل، مع حركة انسيابية بطيئة (drift)
-  const wmDriftX = `(w-text_w)/2 + 22*sin(2*PI*t/6)`;
-  const wmDriftY = `(h-text_h)/2 + 16*sin(2*PI*t/8+1)`;
+  // [تعديل] معاملات الـdrift (سعة الحركة، الفترة، الطور) عشوائية لكل فيديو
+  const driftAmpX = (16 + Math.random() * 14).toFixed(2);
+  const driftPeriodX = (5 + Math.random() * 3).toFixed(2);
+  const driftAmpY = (12 + Math.random() * 10).toFixed(2);
+  const driftPeriodY = (6 + Math.random() * 4).toFixed(2);
+  const driftPhaseY = (Math.random() * Math.PI * 2).toFixed(3);
+  const wmDriftX = `(w-text_w)/2 + ${driftAmpX}*sin(2*PI*t/${driftPeriodX})`;
+  const wmDriftY = `(h-text_h)/2 + ${driftAmpY}*sin(2*PI*t/${driftPeriodY}+${driftPhaseY})`;
   filters.push(
     `[vflash]drawtext=fontfile='${fontFile}':text='${WATERMARK_TEXT}':fontsize=24:fontcolor=white@0.16:` +
     `x='${wmDriftX}':y='${wmDriftY}'[vwm]`
@@ -422,11 +471,15 @@ async function main() {
   const outputPath = 'data/latest-video.mp4';
   const safetyDuration = (totalDuration + 0.3).toFixed(2);
 
+  // [تعديل] بداية عشوائية لمقطع الموسيقى (0 إلى 2 ثانية) — يغيّر البصمة الصوتية للمقطع
+  // المستعمل من الأغنية بين نسخة وأخرى، حتى لو كانت نفس الأغنية الأصلية.
+  const musicStartOffset = (Math.random() * 2).toFixed(2);
+
   const cmd = [
     'ffmpeg -y',
     '-sws_flags lanczos+accurate_rnd+full_chroma_int',
     imageInputs,
-    `-i "${localMusic}"`,
+    `-ss ${musicStartOffset} -i "${localMusic}"`,
     `-filter_complex "${filterComplex}"`,
     `-map "[vout]"`,
     `-map ${localImages.length}:a`,
