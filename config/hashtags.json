@@ -1,11 +1,11 @@
 {
   "fixed": [
     "#DXF", "#CNC", "#LaserCutting", "#FreeDXF", "#MasterDXF",
-    "#CNCProjects", "#LaserCutter", "#DXFFiles", "#Woodworking", "#DIYProjects",
-    "#Maker", "#CADDesign", "#LaserEngraving", "#MetalFabrication", "#CNCRouter"
+    "#CNCProjects", "#LaserCutter", "#DXFFiles", "#CADDesign", "#CNCRouter"
   ],
   "fixed_tiktok": ["#DXF", "#FreeDXF", "#MasterDXF"],
   "pool": [
+    "#Woodworking", "#DIYProjects", "#Maker", "#LaserEngraving", "#MetalFabrication",
     "#CNCDesign", "#CNCDesigns", "#LaserCuttingProjects", "#PlasmaCutting", "#DigitalFabrication",
     "#CNCFiles", "#LaserProjects", "#FreeDesigns", "#Crafting", "#DIY",
     "#Makers", "#Workshop", "#Metalworking", "#LaserEngraver", "#LaserEngravingProjects",
