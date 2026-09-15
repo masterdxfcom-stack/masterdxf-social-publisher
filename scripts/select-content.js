@@ -143,7 +143,7 @@ const musicUrl = musicResult.url;
 const description = pickRandomDescription();
 
 const hashtagData = JSON.parse(fs.readFileSync('config/hashtags.json', 'utf8'));
-const hashtagsFacebook = buildHashtags(hashtagData.fixed, 20);
+const hashtagsFacebook = buildHashtags(hashtagData.fixed, 7);
 const hashtagsTiktok = buildHashtags(hashtagData.fixed_tiktok, 2);
 
 const description_facebook = buildFullDescription(description, result.selected, hashtagsFacebook, 'facebook');
