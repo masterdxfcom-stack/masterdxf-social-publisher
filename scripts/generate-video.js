@@ -7,8 +7,15 @@ const WIDTH = 1080;
 const HEIGHT = 1080;
 const SUPERSAMPLE = WIDTH * 3;
 const FPS = 30;
-const MIN_CLIP_DURATION = 2.5;   // قُلّلت قليلاً بناءً على طلبك (كانت 3.0)
-const MAX_CLIP_DURATION = 3.0;   // قُلّلت قليلاً بناءً على طلبك (كانت 3.6)
+// [تعديل] بدل مدة مقطع ثابتة تقريبًا لكل الفيديوهات، دابا نستهدف مدة إجمالية عشوائية
+// للفيديو كامل بين 10 و18 ثانية، وتُقسّم على عدد الصور المرفوعة (مهما كان عددها) — فكل
+// الصور تظهر إجباريًا، ومدة كل مقطع تُحسب ديناميكيًا حسب العدد والمدة المستهدفة.
+const TARGET_TOTAL_MIN = 10;
+const TARGET_TOTAL_MAX = 18;
+// حد أدنى آمن لمدة أي مقطع حتى لا يصبح "ومضة" غير مفهومة إذا كان عدد الصور كبيرًا جدًا
+// مقارنة بالمدة المستهدفة (عندها المدة الإجمالية قد تتجاوز 18s قليلاً لضمان وضوح كل صورة،
+// وهذا أفضل من حذف صور أو عرضها بسرعة غير مفهومة).
+const MIN_SAFE_CLIP_DURATION = 1.1;
 const MIN_TRANSITION_DURATION = 0.55;
 const MAX_TRANSITION_DURATION = 0.85;
 const WATERMARK_TEXT = "MasterDXF.com";
@@ -120,30 +127,52 @@ function pickFont() {
   return BOLD_FONT;
 }
 
-function computeClipDurations(imageCount, bpm) {
-  const durations = [];
+// [تعديل جوهري] بدل مدة مقطع شبه ثابتة، نحسب الآن مدة كل مقطع ديناميكيًا:
+// 1) نختار مدة إجمالية عشوائية للفيديو كامل بين TARGET_TOTAL_MIN و TARGET_TOTAL_MAX.
+// 2) نوزّعها بالتساوي على عدد الصور (imageCount) مع مراعاة زمن الانتقالات (transitions)
+//    التي "تُقتطع" من المدة الإجمالية حسب منطق xfade الأصلي (offset تراكمي).
+// 3) نضيف تموّجًا عضويًا (نفس فكرة الموجة الأصلية sin) لكل مقطع بدل مدة متساوية جامدة.
+// 4) نعيد قياس (rescale) النتيجة النهائية باش تصل المدة الإجمالية الحقيقية لنفس الهدف
+//    بالضبط (تعويض أي انحراف بسيط سببه التقريب أو الحد الأدنى الآمن للمقطع).
+function computeClipDurations(imageCount, bpm, transitionDurations) {
+  const targetTotal = TARGET_TOTAL_MIN + Math.random() * (TARGET_TOTAL_MAX - TARGET_TOTAL_MIN);
+  const transitionsSum = transitionDurations.reduce((a, b) => a + b, 0);
+  // مجموع مدد المقاطع (durations) اللازم كي تصبح المدة الإجمالية (بعد طرح زمن التداخل
+  // الناتج عن xfade) مساوية بالضبط لـ targetTotal — نفس معادلة totalDuration الأصلية معكوسة.
+  const sumDurationsNeeded = targetTotal + transitionsSum;
+  const baseClip = sumDurationsNeeded / imageCount;
+
+  // تموّج عضوي حول القيمة الأساسية (± حتى 18% منها) بدل مدة متساوية جامدة لكل مقطع.
+  const rawDurations = [];
   for (let i = 0; i < imageCount; i++) {
-    let d;
-    if (i === 0) {
-      d = MAX_CLIP_DURATION;
-    } else if (i === imageCount - 1) {
-      d = MAX_CLIP_DURATION - 0.1;
-    } else {
-      const wave = (Math.sin(i * 1.7) + 1) / 2;
-      d = MIN_CLIP_DURATION + wave * (MAX_CLIP_DURATION - MIN_CLIP_DURATION);
-      // [تعديل] jitter عشوائي بسيط (±0.1s) على المقاطع الوسطى فقط — يغيّر طول كل مقطع
-      // بشكل طفيف بين نسخة وأخرى بدون كسر إحساس الإيقاع العام.
-      d += (Math.random() - 0.5) * 0.2;
-      d = Math.min(MAX_CLIP_DURATION, Math.max(MIN_CLIP_DURATION, d));
-    }
-    if (bpm && bpm > 0) {
-      const beat = 60 / bpm;
-      const beats = Math.max(1, Math.round(d / beat));
-      d = Math.min(MAX_CLIP_DURATION, Math.max(MIN_CLIP_DURATION, beats * beat));
-    }
-    durations.push(Number(d.toFixed(3)));
+    const wave = Math.sin(i * 1.7); // -1..1
+    let d = baseClip * (1 + wave * 0.18);
+    d = Math.max(d, MIN_SAFE_CLIP_DURATION); // حد أدنى آمن حتى لا تصبح "ومضة"
+    rawDurations.push(d);
   }
-  return durations;
+
+  // إعادة القياس (rescale) لضمان وصول المدة الإجمالية الحقيقية لنفس الهدف بالضبط، إلا إذا
+  // فرض MIN_SAFE_CLIP_DURATION حدًا أعلى من targetTotal (عدد صور كبير جدًا) — عندها نترك
+  // المدة الإجمالية تتجاوز 18s قليلاً بدل التضحية بوضوح أي صورة.
+  const rawSum = rawDurations.reduce((a, b) => a + b, 0);
+  const scale = sumDurationsNeeded / rawSum;
+  let durations = rawDurations.map(d => d * scale);
+  // بعد القياس قد ينزل مقطع تحت الحد الآمن من جديد بسبب scale<1 — نصلح ذلك بتثبيت الحد
+  // الأدنى ثم توزيع الفارق على باقي المقاطع (تعويض بسيط) بدل كسر الوعد بالمدة الإجمالية.
+  let deficit = 0;
+  durations = durations.map(d => {
+    if (d < MIN_SAFE_CLIP_DURATION) { deficit += MIN_SAFE_CLIP_DURATION - d; return MIN_SAFE_CLIP_DURATION; }
+    return d;
+  });
+  if (deficit > 0) {
+    const flexibleIdx = durations.map((d, i) => i).filter(i => durations[i] > MIN_SAFE_CLIP_DURATION);
+    if (flexibleIdx.length > 0) {
+      const cut = deficit / flexibleIdx.length;
+      flexibleIdx.forEach(i => { durations[i] = Math.max(MIN_SAFE_CLIP_DURATION, durations[i] - cut); });
+    }
+  }
+
+  return durations.map(d => Number(d.toFixed(3)));
 }
 
 function computeTransitionDurations(imageCount, bpm) {
@@ -468,9 +497,10 @@ async function main() {
   console.log('✅ تم تحميل الموسيقى');
 
   const fontFile = pickFont();
-  const durations = computeClipDurations(localImages.length, bpm);
   const transitionDurations = computeTransitionDurations(localImages.length, bpm);
+  const durations = computeClipDurations(localImages.length, bpm, transitionDurations);
   const totalDuration = durations.reduce((a, b) => a + b, 0) - transitionDurations.reduce((a, b) => a + b, 0);
+  console.log(`⏱️ عدد الصور: ${localImages.length} | المدة الإجمالية المستهدفة تحققت: ${totalDuration.toFixed(2)}s`);
 
   const filterComplex = buildFilterComplex(localImages.length, durations, transitionDurations, totalDuration, hook_text, fontFile);
   const imageInputs = localImages.map(f => `-loop 1 -i "${f}"`).join(' ');
