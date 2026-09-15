@@ -194,24 +194,24 @@ function buildMotion(type, frames, amplitude) {
   const EASE = easedFrameProgress(N);
   switch (type) {
     case 'zoomIn': {
-      const delta = 0.09 * amplitude;
+      const delta = 0.12 * amplitude;
       return { zoom: `1+${delta}*${EASE}`, x: `iw/2-(iw/zoom/2)`, y: `ih/2-(ih/zoom/2)` };
     }
     case 'zoomOut': {
-      const delta = 0.08 * amplitude;
+      const delta = 0.11 * amplitude;
       return { zoom: `(1+${delta})-${delta}*${EASE}`, x: `iw/2-(iw/zoom/2)`, y: `ih/2-(ih/zoom/2)` };
     }
     case 'pushLeft': {
-      const z = 1 + 0.05 * amplitude;
+      const z = 1 + 0.10 * amplitude;
       return { zoom: `${z}`, x: `(iw-iw/zoom)*(1-${EASE})`, y: `ih/2-(ih/zoom/2)` };
     }
     case 'pushRight': {
-      const z = 1 + 0.05 * amplitude;
+      const z = 1 + 0.10 * amplitude;
       return { zoom: `${z}`, x: `(iw-iw/zoom)*${EASE}`, y: `ih/2-(ih/zoom/2)` };
     }
     case 'slowPan':
     default: {
-      const z = 1 + 0.035 * amplitude;
+      const z = 1 + 0.08 * amplitude;
       return { zoom: `${z}`, x: `(iw-iw/zoom)*${EASE}`, y: `ih/2-(ih/zoom/2)+((ih-ih/zoom)*${EASE}*0.3)` };
     }
   }
@@ -226,6 +226,12 @@ function timeEase(tVar, start, dur) {
 
 function buildFilterComplex(imageCount, durations, transitionDurations, totalDuration, hookText, fontFile) {
   const filters = [];
+
+  // [تعديل] "مزاج" عام يُحدَّد مرة واحدة لكل فيديو كامل (وليس لكل مقطع على حدة) — يضاعف كل
+  // شدات الحركة بمعامل موحّد، فبعض الفيديوهات تطلع أهدى بشكل عام وبعضها أقوى بشكل عام،
+  // فوق التنوع الموجود أصلاً لكل مقطع على حدة. هذا يضمن اختلاف واضح "بالعين المجردة" حتى لو
+  // صدفة طلع نفس ترتيب أنواع الحركة في فيديوهين مختلفين.
+  const GLOBAL_ENERGY = Number((0.85 + Math.random() * 0.6).toFixed(3)); // بين 0.85 و1.45
 
   // [تعديل] تسلسل حركة عشوائي لكل فيديو (بدل motionTypes[i % motionTypes.length] الثابت)
   const motionSequence = pickMotionSequence(imageCount);
@@ -250,9 +256,9 @@ function buildFilterComplex(imageCount, durations, transitionDurations, totalDur
   for (let i = 0; i < imageCount; i++) {
     const frames = Math.round((durations[i] + (transitionDurations[i] || transitionDurations[i - 1] || 0.4)) * FPS);
     const type = motionSequence[i];
-    // [تعديل] شدة الزووم/الحركة (amplitude) عشوائية لكل مقطع، نطاق أوسع من قبل (0.75 إلى 1.6
-    // بدل 0.85 إلى 1.2) — تنويع أقوى وأوضح بصريًا في مسار البكسلات بين نسخة وأخرى من نفس الفيديو.
-    const amplitude = Number((0.75 + Math.random() * 0.85).toFixed(3));
+    // [تعديل] شدة الزووم/الحركة (amplitude) عشوائية لكل مقطع، مضروبة بمعامل الطاقة العام
+    // للفيديو كامل (GLOBAL_ENERGY) — طبقتان من العشوائية: لكل مقطع + لكل فيديو ككل.
+    const amplitude = Number((0.75 + Math.random() * 0.85).toFixed(3)) * GLOBAL_ENERGY;
     const motion = buildMotion(type, frames, amplitude);
 
     let zoomExpr = motion.zoom;
