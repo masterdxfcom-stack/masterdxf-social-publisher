@@ -1,0 +1,11 @@
+# ضع هذا الملف في: config/sitemaps.txt
+# كل سطر = صنف واحد. الشكل:
+# الاسم | ملف الـ sitemap | ملف الهاشتاغات | ملف الأوصاف | ملف الـ tracker (اختياري)
+# السطور التي تبدأ بـ # تُتجاهل. الحقلان الأخيران اختياريان؛ إن حذفتهما يُستعمل الافتراضي.
+
+main | data/sitemap-images.xml | config/hashtags.json | config/descriptions.json | data/design-tracker.json
+
+animals | data/sitemap-animals-images.xml | config/hashtags-animals.json | config/descriptions-animals.json
+
+# صنف جديد؟ أضف سطراً هنا فقط، مثلاً:
+# birds | data/sitemap-birds-images.xml | config/hashtags-birds.json | config/descriptions-birds.json
