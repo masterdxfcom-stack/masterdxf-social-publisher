@@ -5,6 +5,43 @@ const GITHUB_REPO = 'masterdxf-social-publisher';
 const GITHUB_BRANCH = 'main';
 const SITE_URL = 'https://masterdxf.com';
 
+// ==== قائمة الأصناف (sitemaps) ====
+// تُقرأ من الملف config/sitemaps.txt — سطر لكل صنف، بالشكل:
+//   الاسم | ملف الـ sitemap | ملف الهاشتاغات | ملف الأوصاف | ملف الـ tracker (اختياري)
+// لإضافة صنف جديد: أضف سطراً واحداً هناك، ولا تلمس هذا الكود.
+// في كل تشغيل يُستعمل صنف واحد (بالتناوب)، ويُؤخذ منه 5 تصاميم لبناء فيديو واحد.
+const DESIGNS_PER_VIDEO = 5;
+const SITEMAPS_LIST_FILE = 'config/sitemaps.txt';
+const DEFAULT_HASHTAGS_FILE = 'config/hashtags.json';
+const DEFAULT_DESCRIPTIONS_FILE = 'config/descriptions.json';
+const ROTATION_FILE = 'data/sitemap-rotation.json';
+
+function loadSitemapList() {
+  const lines = fs.readFileSync(SITEMAPS_LIST_FILE, 'utf8').split(/\r?\n/);
+  const list = [];
+  for (const raw of lines) {
+    const line = raw.trim();
+    if (!line || line.startsWith('#')) continue;
+    const parts = line.split('|').map(p => p.trim());
+    const [name, file, hashtags, descriptions, tracker] = parts;
+    if (!name || !file) { console.warn(`⚠️ سطر غير صالح في ${SITEMAPS_LIST_FILE}: ${line}`); continue; }
+    list.push({
+      name,
+      file,
+      hashtags: hashtags || DEFAULT_HASHTAGS_FILE,
+      descriptions: descriptions || DEFAULT_DESCRIPTIONS_FILE,
+      tracker: tracker || `data/trackers/${name}.json`
+    });
+  }
+  if (list.length === 0) throw new Error(`لا يوجد أي صنف صالح في ${SITEMAPS_LIST_FILE}`);
+  return list;
+}
+
+function readJson(file, fallback) {
+  try { return JSON.parse(fs.readFileSync(file, 'utf8')); }
+  catch (e) { return fallback; }
+}
+
 function parseSitemap(xmlContent) {
   const designs = [];
   const urlBlocks = xmlContent.split('<url>').slice(1);
@@ -28,41 +65,61 @@ function shuffleArray(arr) {
     const j = Math.floor(Math.random() * (i + 1));
     [arr[i], arr[j]] = [arr[j], arr[i]];
   }
+  return arr;
 }
 
-function pickDesigns(allDesigns, tracker) {
-  const allUrls = allDesigns.map(d => d.page_url);
-  let remaining = tracker.remaining || [];
-  let used = tracker.used || [];
+function pickDesigns(allDesigns, tracker, count = DESIGNS_PER_VIDEO) {
+  const known = new Map(allDesigns.map(d => [d.page_url, d]));
+  const allUrls = [...known.keys()];
 
-  const knownUrls = new Set([...remaining, ...used]);
-  const newUrls = allUrls.filter(url => !knownUrls.has(url));
-  if (newUrls.length > 0) {
-    shuffleArray(newUrls);
-    remaining = [...newUrls, ...remaining];
-  }
+  // تنظيف الـ tracker من روابط لم تعد موجودة في الـ sitemap
+  let remaining = (tracker.remaining || []).filter(u => known.has(u));
+  let used = (tracker.used || []).filter(u => known.has(u));
 
-  const currentUrls = new Set(allUrls);
-  remaining = remaining.filter(url => currentUrls.has(url));
-  used = used.filter(url => currentUrls.has(url));
+  // تصاميم جديدة ظهرت في الـ sitemap: تُخلط وتوضع في المقدمة
+  const seen = new Set([...remaining, ...used]);
+  const fresh = allUrls.filter(u => !seen.has(u));
+  remaining = [...shuffleArray(fresh), ...remaining];
 
+  // انتهت الدورة: ابدأ دورة جديدة بترتيب مخلوط مختلف
   if (remaining.length === 0 && used.length > 0) {
-    remaining = used.slice();
-    shuffleArray(remaining);
+    remaining = shuffleArray(used.slice());
     used = [];
   }
 
-  const count = Math.min(5, remaining.length);
-  const selectedUrls = remaining.slice(0, count);
-  const newRemaining = remaining.slice(count);
-  const newUsed = [...used, ...selectedUrls];
+  const selected = remaining.slice(0, count);
+  let newRemaining = remaining.slice(count);
+  let newUsed = [...used, ...selected];
 
-  const selectedDesigns = selectedUrls.map(url => allDesigns.find(d => d.page_url === url));
+  // آخر الدورة وبقي أقل من 5: أكمل العدد من دورة جديدة مخلوطة (بلا تكرار داخل نفس الفيديو)
+  if (selected.length < count && newUsed.length > selected.length) {
+    const pool = shuffleArray(newUsed.filter(u => !selected.includes(u)));
+    const need = Math.min(count - selected.length, pool.length);
+    selected.push(...pool.slice(0, need));
+    newRemaining = pool.slice(need);
+    newUsed = selected.slice();
+  }
 
   return {
-    selected: selectedDesigns,
+    selected: selected.map(u => known.get(u)),
     newTracker: { remaining: newRemaining, used: newUsed, last_updated: new Date().toISOString() }
   };
+}
+
+function chooseSitemap(sitemaps) {
+  const rotation = readJson(ROTATION_FILE, {});
+  const n = sitemaps.length;
+  // نبدأ من الصنف الذي يلي آخر صنف استُعمل (بالاسم، فإضافة أسطر جديدة لا تكسر الترتيب)
+  const lastIdx = sitemaps.findIndex(sm => sm.name === rotation.last_sitemap);
+  const startIdx = (lastIdx + 1) % n;
+  for (let step = 0; step < n; step++) {
+    const sm = sitemaps[(startIdx + step) % n];
+    if (!fs.existsSync(sm.file)) { console.warn(`⚠️ الملف غير موجود: ${sm.file} — تخطّي ${sm.name}`); continue; }
+    const designs = parseSitemap(fs.readFileSync(sm.file, 'utf8'));
+    if (designs.length === 0) { console.warn(`⚠️ لا تصاميم صالحة في ${sm.file} — تخطّي ${sm.name}`); continue; }
+    return { sm, designs };
+  }
+  throw new Error('لا يوجد أي sitemap صالح للقراءة');
 }
 
 function pickMusic(tracker) {
@@ -99,17 +156,21 @@ function pickMusic(tracker) {
   };
 }
 
-function pickRandomDescription() {
-  const descriptions = JSON.parse(fs.readFileSync('config/descriptions.json', 'utf8'));
+function loadWithFallback(file, fallbackFile, label) {
+  if (fs.existsSync(file)) return JSON.parse(fs.readFileSync(file, 'utf8'));
+  console.warn(`⚠️ ملف ${label} غير موجود: ${file} — استعمال الافتراضي ${fallbackFile}`);
+  return JSON.parse(fs.readFileSync(fallbackFile, 'utf8'));
+}
+
+function pickRandomDescription(file) {
+  const descriptions = loadWithFallback(file, DEFAULT_DESCRIPTIONS_FILE, 'الأوصاف');
   return descriptions[Math.floor(Math.random() * descriptions.length)];
 }
 
-function buildHashtags(fixedList, randomCount) {
-  const data = JSON.parse(fs.readFileSync('config/hashtags.json', 'utf8'));
-  const pool = [...data.pool];
+function buildHashtags(hashtagData, fixedList, randomCount) {
+  const pool = [...(hashtagData.pool || [])];
   shuffleArray(pool);
-  const randomPicks = pool.slice(0, randomCount);
-  return [...fixedList, ...randomPicks];
+  return [...(fixedList || []), ...pool.slice(0, randomCount)];
 }
 
 function withUtm(baseUrl, platform, content) {
@@ -130,30 +191,34 @@ function buildFullDescription(baseDescription, selectedDesigns, hashtags, platfo
 }
 
 // ==== التشغيل ====
-const xml = fs.readFileSync('data/sitemap-images.xml', 'utf8');
-const allDesigns = parseSitemap(xml);
-
-const tracker = JSON.parse(fs.readFileSync('data/design-tracker.json', 'utf8'));
-const result = pickDesigns(allDesigns, tracker);
+const sitemaps = loadSitemapList();
+const chosen = chooseSitemap(sitemaps);
+const tracker = readJson(chosen.sm.tracker, {});
+const result = pickDesigns(chosen.designs, tracker);
+console.log(`🗺️ الصنف المستعمل: ${chosen.sm.name} (${chosen.designs.length} تصميم)`);
 
 const musicTracker = JSON.parse(fs.readFileSync('data/music-tracker.json', 'utf8'));
 const musicResult = pickMusic(musicTracker);
 const musicUrl = musicResult.url;
 
-const description = pickRandomDescription();
+// الوصف والهاشتاغات من ملفات الصنف نفسه
+const description = pickRandomDescription(chosen.sm.descriptions);
 
-const hashtagData = JSON.parse(fs.readFileSync('config/hashtags.json', 'utf8'));
-const hashtagsFacebook = buildHashtags(hashtagData.fixed, 7);
-const hashtagsTiktok = buildHashtags(hashtagData.fixed_tiktok, 2);
+const hashtagData = loadWithFallback(chosen.sm.hashtags, DEFAULT_HASHTAGS_FILE, 'الهاشتاغات');
+const hashtagsFacebook = buildHashtags(hashtagData, hashtagData.fixed, 7);
+const hashtagsTiktok = buildHashtags(hashtagData, hashtagData.fixed_tiktok, 2);
 
 const description_facebook = buildFullDescription(description, result.selected, hashtagsFacebook, 'facebook');
 const description_tiktok = buildFullDescription(description, result.selected, hashtagsTiktok, 'tiktok');
 const description_instagram = buildFullDescription(description, result.selected, hashtagsFacebook, 'instagram');
 
-fs.writeFileSync('data/design-tracker.json', JSON.stringify(result.newTracker, null, 2));
+fs.mkdirSync(require('path').dirname(chosen.sm.tracker), { recursive: true });
+fs.writeFileSync(chosen.sm.tracker, JSON.stringify(result.newTracker, null, 2));
+fs.writeFileSync(ROTATION_FILE, JSON.stringify({ last_sitemap: chosen.sm.name }, null, 2));
 fs.writeFileSync('data/music-tracker.json', JSON.stringify(musicResult.newTracker, null, 2));
 
 const finalOutput = {
+  source_sitemap: chosen.sm.name,
   images: result.selected.map(d => d.image_url),
   music_url: musicUrl,
   hook_text: description,
