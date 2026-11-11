@@ -15,6 +15,7 @@ const SITEMAPS_LIST_FILE = 'config/sitemaps.txt';
 const DEFAULT_HASHTAGS_FILE = 'config/hashtags.json';
 const DEFAULT_DESCRIPTIONS_FILE = 'config/descriptions.json';
 const ROTATION_FILE = 'data/sitemap-rotation.json';
+const ACTIVE_FILE = 'config/active-sitemaps.txt';
 
 function loadSitemapList() {
   const lines = fs.readFileSync(SITEMAPS_LIST_FILE, 'utf8').split(/\r?\n/);
@@ -26,6 +27,7 @@ function loadSitemapList() {
     const [name, file, hashtags, descriptions, tracker] = parts;
     if (!name || !file) { console.warn(`⚠️ سطر غير صالح في ${SITEMAPS_LIST_FILE}: ${line}`); continue; }
     list.push({
+      number: list.length + 1,
       name,
       file,
       hashtags: hashtags || DEFAULT_HASHTAGS_FILE,
@@ -35,6 +37,34 @@ function loadSitemapList() {
   }
   if (list.length === 0) throw new Error(`لا يوجد أي صنف صالح في ${SITEMAPS_LIST_FILE}`);
   return list;
+}
+
+// تفعيل/تعطيل الأصناف: ملف config/active-sitemaps.txt (اختياري).
+// يحتوي أرقام الأصناف (بترتيب أسطرها في sitemaps.txt) أو أسماءها، مفصولة بمسافة أو فاصلة.
+// ملف غير موجود أو فارغ أو فيه كلمة all = كل الأصناف مفعّلة.
+function applyActiveSelection(list) {
+  if (!fs.existsSync(ACTIVE_FILE)) return list;
+  const tokens = fs.readFileSync(ACTIVE_FILE, 'utf8')
+    .split(/\r?\n/)
+    .map(l => l.replace(/#.*$/, '').trim())
+    .filter(Boolean)
+    .join(' ')
+    .split(/[\s,;،]+/)
+    .filter(Boolean);
+  if (tokens.length === 0 || tokens.some(t => t.toLowerCase() === 'all')) return list;
+
+  const picked = new Set();
+  for (const t of tokens) {
+    const sm = /^\d+$/.test(t)
+      ? list.find(x => x.number === Number(t))
+      : list.find(x => x.name.toLowerCase() === t.toLowerCase());
+    if (sm) picked.add(sm); else console.warn(`⚠️ في ${ACTIVE_FILE}: لا يوجد صنف "${t}" — تجاهل`);
+  }
+  if (picked.size === 0) {
+    console.warn(`⚠️ لا صنف صالح في ${ACTIVE_FILE} — سيتم تفعيل كل الأصناف`);
+    return list;
+  }
+  return list.filter(sm => picked.has(sm));
 }
 
 function readJson(file, fallback) {
@@ -191,7 +221,9 @@ function buildFullDescription(baseDescription, selectedDesigns, hashtags, platfo
 }
 
 // ==== التشغيل ====
-const sitemaps = loadSitemapList();
+const allSitemaps = loadSitemapList();
+const sitemaps = applyActiveSelection(allSitemaps);
+console.log('✅ الأصناف المفعّلة: ' + sitemaps.map(sm => `${sm.number}(${sm.name})`).join(' , '));
 const chosen = chooseSitemap(sitemaps);
 const tracker = readJson(chosen.sm.tracker, {});
 const result = pickDesigns(chosen.designs, tracker);
