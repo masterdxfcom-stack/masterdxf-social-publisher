@@ -1,0 +1,76 @@
+name: Test All Compositions (no publish)
+
+# تجربة: يولّد فيديو واحداً لكل تركيبة بنفس التصاميم، دون أي commit ودون أي نشر.
+# لا يُحفظ شيء في المستودع، فلا تتأثر ملفات التتبع (trackers) ولا ملف التناوب،
+# والفيديوهات تُحمَّل من صفحة التشغيل (Artifacts) وتُحذف تلقائياً بعد 3 أيام.
+
+on:
+  workflow_dispatch:
+    inputs:
+      compositions:
+        description: 'التركيبات المراد تجربتها، مفصولة بمسافة'
+        required: false
+        default: 'classic strips collage cards laser'
+
+permissions:
+  contents: read
+
+jobs:
+  test-all:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install ffmpeg
+        run: sudo apt-get update && sudo apt-get install -y ffmpeg
+
+      - name: Select content (not saved to repo)
+        run: node scripts/select-content-new.js
+
+      - name: Generate one video per composition
+        env:
+          COMPS: ${{ inputs.compositions }}
+        run: |
+          mkdir -p out
+          : > out/failed.txt
+          {
+            echo "| التركيبة | النتيجة | المدة | الحجم |"
+            echo "|---|---|---|---|"
+          } >> "$GITHUB_STEP_SUMMARY"
+
+          for c in $COMPS; do
+            echo "::group::$c"
+            rm -rf tmp_video_build data/latest-video.mp4
+            if VIDEO_COMPOSITION="$c" node scripts/generate-video-new.js \
+               && grep -q "\"composition\": \"$c\"" data/latest-output.json \
+               && cp data/latest-video.mp4 "out/$c.mp4"; then
+              dur=$(ffprobe -v error -show_entries format=duration -of csv=p=0 "out/$c.mp4" | cut -d. -f1)
+              size=$(du -h "out/$c.mp4" | cut -f1)
+              echo "| $c | ✅ OK | ${dur}s | $size |" >> "$GITHUB_STEP_SUMMARY"
+            else
+              echo "$c" >> out/failed.txt
+              echo "| $c | ❌ FAILED | - | - |" >> "$GITHUB_STEP_SUMMARY"
+            fi
+            echo "::endgroup::"
+          done
+
+          if [ -s out/failed.txt ]; then
+            echo "Failed compositions: $(tr '\n' ' ' < out/failed.txt)"
+            exit 1
+          fi
+
+      - name: Upload test videos (auto-deleted after 3 days)
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-videos
+          path: out/*.mp4
+          retention-days: 3
+          if-no-files-found: ignore
