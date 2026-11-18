@@ -18,6 +18,15 @@ const ROTATION_FILE = 'data/sitemap-rotation.json';
 const ACTIVE_FILE = 'config/active-sitemaps.txt';
 
 function loadSitemapList() {
+  // إن لم يوجد ملف القائمة: صنف واحد افتراضي (النظام القديم) حتى لا يتوقف السكربت
+  if (!fs.existsSync(SITEMAPS_LIST_FILE)) {
+    console.warn(`⚠️ ${SITEMAPS_LIST_FILE} غير موجود — استعمال الصنف الافتراضي main`);
+    return [{
+      number: 1, name: 'main', file: 'data/sitemap-images.xml',
+      hashtags: DEFAULT_HASHTAGS_FILE, descriptions: DEFAULT_DESCRIPTIONS_FILE,
+      tracker: 'data/design-tracker.json'
+    }];
+  }
   const lines = fs.readFileSync(SITEMAPS_LIST_FILE, 'utf8').split(/\r?\n/);
   const list = [];
   for (const raw of lines) {
@@ -203,21 +212,30 @@ function buildHashtags(hashtagData, fixedList, randomCount) {
   return [...(fixedList || []), ...pool.slice(0, randomCount)];
 }
 
-function withUtm(baseUrl, platform, content) {
-  const url = new URL(baseUrl);
-  url.searchParams.set('utm_source', platform);
-  url.searchParams.set('utm_medium', 'organic_social');
-  url.searchParams.set('utm_campaign', 'design_showcase');
-  url.searchParams.set('utm_content', content);
-  return url.toString();
+// ===== سياسة الروابط لكل منصة =====
+//   facebook  : روابط نقية (بدون أي UTM أو معاملات) للموقع وللتصاميم
+//   instagram : بدون أي رابط، فقط النص masterdxf.com
+//   tiktok    : بدون أي رابط، فقط النص masterdxf.com
+const LINK_POLICY = { facebook: 'clean_links', instagram: 'domain_only', tiktok: 'domain_only' };
+const SITE_DOMAIN = new URL(SITE_URL).hostname.replace(/^www\./, '');
+
+// رابط نقي: بدون ?query أو #fragment
+function cleanUrl(url) {
+  const u = new URL(url);
+  u.search = '';
+  u.hash = '';
+  return u.toString();
 }
 
 function buildFullDescription(baseDescription, selectedDesigns, hashtags, platform) {
-  const siteLink = withUtm(SITE_URL, platform, 'site_link');
-  const designLinks = selectedDesigns
-    .map((d, i) => withUtm(d.page_url, platform, `design_${i + 1}`))
-    .join('\n');
-  return [baseDescription, '', siteLink, designLinks, '', hashtags.join(' ')].join('\n');
+  const policy = LINK_POLICY[platform] || 'domain_only';
+  if (policy === 'clean_links') {
+    const designLinks = selectedDesigns.map(d => cleanUrl(d.page_url)).join('\n');
+    return [baseDescription, '', SITE_URL, designLinks, '', hashtags.join(' ')].join('\n');
+  }
+  // domain_only: لا روابط إطلاقًا — حتى لو احتوى نص الوصف نفسه على رابط يُستبدل باسم النطاق
+  const safeBase = baseDescription.replace(/https?:\/\/\S+/gi, SITE_DOMAIN);
+  return [safeBase, '', SITE_DOMAIN, '', hashtags.join(' ')].join('\n');
 }
 
 // ==== التشغيل ====
