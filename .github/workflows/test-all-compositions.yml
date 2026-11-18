@@ -10,7 +10,7 @@ on:
       compositions:
         description: 'التركيبات المراد تجربتها، مفصولة بمسافة'
         required: false
-        default: 'classic strips collage cards laser'
+        default: 'classic strips collage cards laser countdown tunnel neon kaleido glitch'
 
 permissions:
   contents: read
