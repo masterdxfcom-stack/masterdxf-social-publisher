@@ -1,16 +1,16 @@
 {
-  "source_sitemap": "main",
+  "source_sitemap": "animals",
   "images": [
-    "https://masterdxf.com/door%20panel/1x/D254.webp",
-    "https://masterdxf.com/door%20panel/1x/D385.webp",
-    "https://masterdxf.com/double%20doors/WEBP/A10.webp",
-    "https://masterdxf.com/door%20panel/1x/W5.webp",
-    "https://masterdxf.com/door%20panel/1x/D160.webp"
+    "https://masterdxf.com/animals-files/WEBP/A00067.webp",
+    "https://masterdxf.com/animals-files/WEBP/A00016.webp",
+    "https://masterdxf.com/animals-files/WEBP/A00042.webp",
+    "https://masterdxf.com/animals-files/WEBP/A00008.webp",
+    "https://masterdxf.com/animals-files/WEBP/A00036.webp"
   ],
-  "music_url": "https://raw.githubusercontent.com/masterdxfcom-stack/masterdxf-social-publisher/main/music/sonican-a-cappella-pop-fun-time-30-seconds-354287.mp3",
-  "hook_text": "Every new project is an opportunity to create something different. Find your next design in the MASTERDXF collection.",
-  "description_facebook": "Every new project is an opportunity to create something different. Find your next design in the MASTERDXF collection.\n\nhttps://masterdxf.com\nhttps://masterdxf.com/designs/paisley-swirl-droplet-dxf-screen-for-artistic-wall-panels\nhttps://masterdxf.com/designs/moroccan-star-tile-door-panel-dxf\nhttps://masterdxf.com/designs/modern-arched-grid-gate-with-greek-key-accent-design\nhttps://masterdxf.com/designs/ornamental-square-steel-window-design\nhttps://masterdxf.com/designs/rising-mythical-phoenix-diagonal-harlequin-matrix\n\n#DXF #CNC #LaserCutting #FreeDXF #MasterDXF #CNCProjects #LaserCutter #DXFFiles #CADDesign #CNCRouter #CNCRouterProjects #MakeSomething #LaserCuttingArt #SmallBusiness #Crafting #3DDesignIdeas #CNCDesigns",
-  "description_tiktok": "Every new project is an opportunity to create something different. Find your next design in the MASTERDXF collection.\n\nmasterdxf.com\n\n#DXF #FreeDXF #MasterDXF #MetalworkingProjects #Woodworking",
-  "description_instagram": "Every new project is an opportunity to create something different. Find your next design in the MASTERDXF collection.\n\nmasterdxf.com\n\n#DXF #CNC #LaserCutting #FreeDXF #MasterDXF #CNCProjects #LaserCutter #DXFFiles #CADDesign #CNCRouter #CNCRouterProjects #MakeSomething #LaserCuttingArt #SmallBusiness #Crafting #3DDesignIdeas #CNCDesigns",
-  "composition": "classic"
+  "music_url": "https://raw.githubusercontent.com/masterdxfcom-stack/masterdxf-social-publisher/main/music/Viva_El_Sol.mp3",
+  "hook_text": "Your next cutting project might have fur, feathers, or fins. Check out these 5 free animal DXF files.",
+  "description_facebook": "Your next cutting project might have fur, feathers, or fins. Check out these 5 free animal DXF files.\n\nhttps://masterdxf.com\nhttps://masterdxf.com/animals/slender-profile-cat-folded-paws-dxf-vector\nhttps://masterdxf.com/animals/bull-head-stencil-square-panel-dxf-svg\nhttps://masterdxf.com/animals/geometric-eagle-swooping-flight-dxf-file\nhttps://masterdxf.com/animals/eagle-head-rounded-panel-dxf-for-metal-art\nhttps://masterdxf.com/animals/five-angelfish-swimming-free-dxf-download\n\n#AnimalDXF #FreeDXF #MasterDXF #DXF #LaserCutting #CNC #PlasmaCutting #MetalWallArt #AnimalArt #LaserCutAnimals #WoodWallArt #GardenArt #LineArt #BullHead #FishArt #WallArtDecor #SteelArt",
+  "description_tiktok": "Your next cutting project might have fur, feathers, or fins. Check out these 5 free animal DXF files.\n\nmasterdxf.com\n\n#AnimalDXF #FreeDXF #MasterDXF #VectorFiles #Makers",
+  "description_instagram": "Your next cutting project might have fur, feathers, or fins. Check out these 5 free animal DXF files.\n\nmasterdxf.com\n\n#AnimalDXF #FreeDXF #MasterDXF #DXF #LaserCutting #CNC #PlasmaCutting #MetalWallArt #AnimalArt #LaserCutAnimals #WoodWallArt #GardenArt #LineArt #BullHead #FishArt #WallArtDecor #SteelArt",
+  "composition": "strips"
 }
