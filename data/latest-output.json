@@ -1,16 +1,16 @@
 {
-  "source_sitemap": "main",
+  "source_sitemap": "animals",
   "images": [
-    "https://masterdxf.com/door%20panel/1x/D162.webp",
-    "https://masterdxf.com/door%20panel/1x/D5.webp",
-    "https://masterdxf.com/door%20panel/1x/D171.webp",
-    "https://masterdxf.com/door%20panel/1x/D34.webp",
-    "https://masterdxf.com/door%20panel/1x/D141.webp"
+    "https://masterdxf.com/animals-files/WEBP/A00010.webp",
+    "https://masterdxf.com/animals-files/WEBP/A00072.webp",
+    "https://masterdxf.com/animals-files/WEBP/A00017.webp",
+    "https://masterdxf.com/animals-files/WEBP/A00038.webp",
+    "https://masterdxf.com/animals-files/WEBP/A00057.webp"
   ],
-  "music_url": "https://raw.githubusercontent.com/masterdxfcom-stack/masterdxf-social-publisher/main/music/Energy.mp3",
-  "hook_text": "One library, countless creative possibilities. Discover designs for laser, CNC, and plasma cutting at MASTERDXF.",
-  "description_facebook": "One library, countless creative possibilities. Discover designs for laser, CNC, and plasma cutting at MASTERDXF.\n\nhttps://masterdxf.com\nhttps://masterdxf.com/designs/abstract-mirror-arabesque-damask-crest-divider\nhttps://masterdxf.com/designs/intricate-arabesque-decorative-panel-dxf-for-cnc\nhttps://masterdxf.com/designs/abstract-skewed-multi-size-slat-architecture-panel\nhttps://masterdxf.com/designs/classical-geometric-islamic-starburst-cnc-pattern\nhttps://masterdxf.com/designs/symmetrical-s-curve-baroque-scroll-accent-divider\n\n#DXF #CNC #LaserCutting #FreeDXF #MasterDXF #CNCProjects #LaserCutter #DXFFiles #CADDesign #CNCRouter #DIYTools #DIY #PlasmaCuttingArt #DIYProjects #HomeShopTools #LaserBusiness #WoodworkingProjects",
-  "description_tiktok": "One library, countless creative possibilities. Discover designs for laser, CNC, and plasma cutting at MASTERDXF.\n\nmasterdxf.com\n\n#DXF #FreeDXF #MasterDXF #Woodworking #DesignForManufacturing",
-  "description_instagram": "One library, countless creative possibilities. Discover designs for laser, CNC, and plasma cutting at MASTERDXF.\n\nmasterdxf.com\n\n#DXF #CNC #LaserCutting #FreeDXF #MasterDXF #CNCProjects #LaserCutter #DXFFiles #CADDesign #CNCRouter #DIYTools #DIY #PlasmaCuttingArt #DIYProjects #HomeShopTools #LaserBusiness #WoodworkingProjects",
-  "composition": "collage"
+  "music_url": "https://raw.githubusercontent.com/masterdxfcom-stack/masterdxf-social-publisher/main/music/Radio.mp3",
+  "hook_text": "Make your workshop wall come alive! Download these 5 free animal DXF designs for laser, CNC, or plasma.",
+  "description_facebook": "Make your workshop wall come alive! Download these 5 free animal DXF designs for laser, CNC, or plasma.\n\nhttps://masterdxf.com\nhttps://masterdxf.com/animals/origami-flamingo-one-leg-dxf-design\nhttps://masterdxf.com/animals/spiky-crest-eagle-stencil-dxf-plate\nhttps://masterdxf.com/animals/zodiac-ram-spiral-horns-circle-dxf-cut-file\nhttps://masterdxf.com/animals/spider-web-wing-bat-halloween-dxf\nhttps://masterdxf.com/animals/howling-wolf-sitting-low-poly-free-dxf\n\n#AnimalDXF #FreeDXF #MasterDXF #DXF #LaserCutting #CNC #PlasmaCutting #MetalWallArt #AnimalArt #LaserCutAnimals #DIYDecor #Stencil #CNCRouterArt #PlasmaCutterProjects #WolfArt #StagHead #PlasmaCNC",
+  "description_tiktok": "Make your workshop wall come alive! Download these 5 free animal DXF designs for laser, CNC, or plasma.\n\nmasterdxf.com\n\n#AnimalDXF #FreeDXF #MasterDXF #WoodDecor #MetalDesign",
+  "description_instagram": "Make your workshop wall come alive! Download these 5 free animal DXF designs for laser, CNC, or plasma.\n\nmasterdxf.com\n\n#AnimalDXF #FreeDXF #MasterDXF #DXF #LaserCutting #CNC #PlasmaCutting #MetalWallArt #AnimalArt #LaserCutAnimals #DIYDecor #Stencil #CNCRouterArt #PlasmaCutterProjects #WolfArt #StagHead #PlasmaCNC",
+  "composition": "cards"
 }
