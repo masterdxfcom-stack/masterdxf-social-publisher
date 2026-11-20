@@ -1,16 +1,16 @@
 {
-  "source_sitemap": "animals",
+  "source_sitemap": "main",
   "images": [
-    "https://masterdxf.com/animals-files/WEBP/A00010.webp",
-    "https://masterdxf.com/animals-files/WEBP/A00072.webp",
-    "https://masterdxf.com/animals-files/WEBP/A00017.webp",
-    "https://masterdxf.com/animals-files/WEBP/A00038.webp",
-    "https://masterdxf.com/animals-files/WEBP/A00057.webp"
+    "https://masterdxf.com/door%20panel/1x/D239.webp",
+    "https://masterdxf.com/door%20panel/1x/D56.webp",
+    "https://masterdxf.com/door%20panel/1x/D266.webp",
+    "https://masterdxf.com/door%20panel/1x/D229.webp",
+    "https://masterdxf.com/door%20panel/1x/D103.webp"
   ],
-  "music_url": "https://raw.githubusercontent.com/masterdxfcom-stack/masterdxf-social-publisher/main/music/Radio.mp3",
-  "hook_text": "Make your workshop wall come alive! Download these 5 free animal DXF designs for laser, CNC, or plasma.",
-  "description_facebook": "Make your workshop wall come alive! Download these 5 free animal DXF designs for laser, CNC, or plasma.\n\nhttps://masterdxf.com\nhttps://masterdxf.com/animals/origami-flamingo-one-leg-dxf-design\nhttps://masterdxf.com/animals/spiky-crest-eagle-stencil-dxf-plate\nhttps://masterdxf.com/animals/zodiac-ram-spiral-horns-circle-dxf-cut-file\nhttps://masterdxf.com/animals/spider-web-wing-bat-halloween-dxf\nhttps://masterdxf.com/animals/howling-wolf-sitting-low-poly-free-dxf\n\n#AnimalDXF #FreeDXF #MasterDXF #DXF #LaserCutting #CNC #PlasmaCutting #MetalWallArt #AnimalArt #LaserCutAnimals #DIYDecor #Stencil #CNCRouterArt #PlasmaCutterProjects #WolfArt #StagHead #PlasmaCNC",
-  "description_tiktok": "Make your workshop wall come alive! Download these 5 free animal DXF designs for laser, CNC, or plasma.\n\nmasterdxf.com\n\n#AnimalDXF #FreeDXF #MasterDXF #WoodDecor #MetalDesign",
-  "description_instagram": "Make your workshop wall come alive! Download these 5 free animal DXF designs for laser, CNC, or plasma.\n\nmasterdxf.com\n\n#AnimalDXF #FreeDXF #MasterDXF #DXF #LaserCutting #CNC #PlasmaCutting #MetalWallArt #AnimalArt #LaserCutAnimals #DIYDecor #Stencil #CNCRouterArt #PlasmaCutterProjects #WolfArt #StagHead #PlasmaCNC",
-  "composition": "cards"
+  "music_url": "https://raw.githubusercontent.com/masterdxfcom-stack/masterdxf-social-publisher/main/music/white_records-epic-background-orchestral-instrumental-music-for-short-videos-26-sec-180908.mp3",
+  "hook_text": "Looking for your next best-selling workshop design? Explore new ideas and discover what MASTERDXF has to offer.",
+  "description_facebook": "Looking for your next best-selling workshop design? Explore new ideas and discover what MASTERDXF has to offer.\n\nhttps://masterdxf.com\nhttps://masterdxf.com/designs/overlapping-scale-mesh-dxf-screen-for-textured-facades\nhttps://masterdxf.com/designs/modern-retro-rounded-rectangle-matrix-fretwork-design\nhttps://masterdxf.com/designs/loose-leaf-scatter-dxf-screen-for-casual-garden-panels\nhttps://masterdxf.com/designs/mirrored-spiral-swirl-dxf-pattern-for-statement-screens\nhttps://masterdxf.com/designs/classic-damask-floral-damask-screen-vector\n\n#DXF #CNC #LaserCutting #FreeDXF #MasterDXF #CNCProjects #LaserCutter #DXFFiles #CADDesign #CNCRouter #WoodworkingProjects #WoodProjects #LaserCuttingDesigns #LaserCuttingDIY #CNCMachine #MetalDesign #WoodCrafts",
+  "description_tiktok": "Looking for your next best-selling workshop design? Explore new ideas and discover what MASTERDXF has to offer.\n\nmasterdxf.com\n\n#DXF #FreeDXF #MasterDXF #DIYWorkshop #PlasmaCuttingDesigns",
+  "description_instagram": "Looking for your next best-selling workshop design? Explore new ideas and discover what MASTERDXF has to offer.\n\nmasterdxf.com\n\n#DXF #CNC #LaserCutting #FreeDXF #MasterDXF #CNCProjects #LaserCutter #DXFFiles #CADDesign #CNCRouter #WoodworkingProjects #WoodProjects #LaserCuttingDesigns #LaserCuttingDIY #CNCMachine #MetalDesign #WoodCrafts",
+  "composition": "laser"
 }
