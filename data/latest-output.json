@@ -1,16 +1,16 @@
 {
-  "source_sitemap": "animals",
+  "source_sitemap": "main",
   "images": [
-    "https://masterdxf.com/animals-files/WEBP/A00015.webp",
-    "https://masterdxf.com/animals-files/WEBP/A00064.webp",
-    "https://masterdxf.com/animals-files/WEBP/A00068.webp",
-    "https://masterdxf.com/animals-files/WEBP/A00024.webp",
-    "https://masterdxf.com/animals-files/WEBP/A00043.webp"
+    "https://masterdxf.com/door%20panel/1x/D356.webp",
+    "https://masterdxf.com/door%20panel/1x/D134.webp",
+    "https://masterdxf.com/door%20panel/1x/D128.webp",
+    "https://masterdxf.com/door%20panel/1x/D199.webp",
+    "https://masterdxf.com/double%20doors/WEBP/A1.webp"
   ],
-  "music_url": "https://raw.githubusercontent.com/masterdxfcom-stack/masterdxf-social-publisher/main/music/My_Fav_Crash_Out_Song.mp3",
-  "hook_text": "Animal designs for laser, CNC, and plasma cutting. Download these 5 free DXF files and start creating.",
-  "description_facebook": "Animal designs for laser, CNC, and plasma cutting. Download these 5 free DXF files and start creating.\n\nhttps://masterdxf.com\nhttps://masterdxf.com/animals/angry-bull-head-with-horns-dxf-for-plasma\nhttps://masterdxf.com/animals/tribal-roaring-lion-square-frame-dxf-svg\nhttps://masterdxf.com/animals/peeking-kitten-striped-paws-dxf-laser-file\nhttps://masterdxf.com/animals/spotted-deer-buck-standing-laser-cut-dxf\nhttps://masterdxf.com/animals/scaled-bass-fish-spiny-fin-dxf-for-fishing-decor\n\n#AnimalDXF #FreeDXF #MasterDXF #DXF #LaserCutting #CNC #PlasmaCutting #MetalWallArt #AnimalArt #LaserCutAnimals #Metalworking #DXFDesigns #StagHead #FarmhouseDecor #MetalFabrication #StencilArt #WolfHead",
-  "description_tiktok": "Animal designs for laser, CNC, and plasma cutting. Download these 5 free DXF files and start creating.\n\nmasterdxf.com\n\n#AnimalDXF #FreeDXF #MasterDXF #GardenArt #VectorFiles",
-  "description_instagram": "Animal designs for laser, CNC, and plasma cutting. Download these 5 free DXF files and start creating.\n\nmasterdxf.com\n\n#AnimalDXF #FreeDXF #MasterDXF #DXF #LaserCutting #CNC #PlasmaCutting #MetalWallArt #AnimalArt #LaserCutAnimals #Metalworking #DXFDesigns #StagHead #FarmhouseDecor #MetalFabrication #StencilArt #WolfHead",
-  "composition": "glitch"
+  "music_url": "https://raw.githubusercontent.com/masterdxfcom-stack/masterdxf-social-publisher/main/music/Runway_Pop.mp3",
+  "hook_text": "Your workshop, your machine, your next creation. Find the design that brings your next idea to life at MASTERDXF.",
+  "description_facebook": "Your workshop, your machine, your next creation. Find the design that brings your next idea to life at MASTERDXF.\n\nhttps://masterdxf.com\nhttps://masterdxf.com/designs/symmetrical-wrought-iron-gate-scroll-free-dxf\nhttps://masterdxf.com/designs/scattered-autumn-maple-leaf-architectural-accent-panel\nhttps://masterdxf.com/designs/continuous-repeating-islamic-girih-star-geometric-matrix\nhttps://masterdxf.com/designs/symmetrical-flourish-damask-dxf-panel-for-wall-art\nhttps://masterdxf.com/designs/modern-minimalist-curved-grid-gate-design-for-cnc-plasma\n\n#DXF #CNC #LaserCutting #FreeDXF #MasterDXF #CNCProjects #LaserCutter #DXFFiles #CADDesign #CNCRouter #LaserCuttingHobby #MakeSomething #LaserCuttingDesigns #PlasmaCutterProjects #MetalArt #MetalDesign #LaserEngraver",
+  "description_tiktok": "Your workshop, your machine, your next creation. Find the design that brings your next idea to life at MASTERDXF.\n\nmasterdxf.com\n\n#DXF #FreeDXF #MasterDXF #LaserEngraver #PlasmaCutter",
+  "description_instagram": "Your workshop, your machine, your next creation. Find the design that brings your next idea to life at MASTERDXF.\n\nmasterdxf.com\n\n#DXF #CNC #LaserCutting #FreeDXF #MasterDXF #CNCProjects #LaserCutter #DXFFiles #CADDesign #CNCRouter #LaserCuttingHobby #MakeSomething #LaserCuttingDesigns #PlasmaCutterProjects #MetalArt #MetalDesign #LaserEngraver",
+  "composition": "classic"
 }
