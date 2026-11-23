@@ -1,16 +1,16 @@
 {
-  "source_sitemap": "main",
+  "source_sitemap": "animals",
   "images": [
-    "https://masterdxf.com/door%20panel/1x/D356.webp",
-    "https://masterdxf.com/door%20panel/1x/D134.webp",
-    "https://masterdxf.com/door%20panel/1x/D128.webp",
-    "https://masterdxf.com/door%20panel/1x/D199.webp",
-    "https://masterdxf.com/double%20doors/WEBP/A1.webp"
+    "https://masterdxf.com/animals-files/WEBP/A00017.webp",
+    "https://masterdxf.com/animals-files/WEBP/A00072.webp",
+    "https://masterdxf.com/animals-files/WEBP/A00006.webp",
+    "https://masterdxf.com/animals-files/WEBP/A00070.webp",
+    "https://masterdxf.com/animals-files/WEBP/A00060.webp"
   ],
-  "music_url": "https://raw.githubusercontent.com/masterdxfcom-stack/masterdxf-social-publisher/main/music/Runway_Pop.mp3",
-  "hook_text": "Your workshop, your machine, your next creation. Find the design that brings your next idea to life at MASTERDXF.",
-  "description_facebook": "Your workshop, your machine, your next creation. Find the design that brings your next idea to life at MASTERDXF.\n\nhttps://masterdxf.com\nhttps://masterdxf.com/designs/symmetrical-wrought-iron-gate-scroll-free-dxf\nhttps://masterdxf.com/designs/scattered-autumn-maple-leaf-architectural-accent-panel\nhttps://masterdxf.com/designs/continuous-repeating-islamic-girih-star-geometric-matrix\nhttps://masterdxf.com/designs/symmetrical-flourish-damask-dxf-panel-for-wall-art\nhttps://masterdxf.com/designs/modern-minimalist-curved-grid-gate-design-for-cnc-plasma\n\n#DXF #CNC #LaserCutting #FreeDXF #MasterDXF #CNCProjects #LaserCutter #DXFFiles #CADDesign #CNCRouter #LaserCuttingHobby #MakeSomething #LaserCuttingDesigns #PlasmaCutterProjects #MetalArt #MetalDesign #LaserEngraver",
-  "description_tiktok": "Your workshop, your machine, your next creation. Find the design that brings your next idea to life at MASTERDXF.\n\nmasterdxf.com\n\n#DXF #FreeDXF #MasterDXF #LaserEngraver #PlasmaCutter",
-  "description_instagram": "Your workshop, your machine, your next creation. Find the design that brings your next idea to life at MASTERDXF.\n\nmasterdxf.com\n\n#DXF #CNC #LaserCutting #FreeDXF #MasterDXF #CNCProjects #LaserCutter #DXFFiles #CADDesign #CNCRouter #LaserCuttingHobby #MakeSomething #LaserCuttingDesigns #PlasmaCutterProjects #MetalArt #MetalDesign #LaserEngraver",
-  "composition": "classic"
+  "music_url": "https://raw.githubusercontent.com/masterdxfcom-stack/masterdxf-social-publisher/main/music/Love_My_Ride.mp3",
+  "hook_text": "Five animals, five new project ideas. Download the free DXF files and start cutting.",
+  "description_facebook": "Five animals, five new project ideas. Download the free DXF files and start cutting.\n\nhttps://masterdxf.com\nhttps://masterdxf.com/animals/zodiac-ram-spiral-horns-circle-dxf-cut-file\nhttps://masterdxf.com/animals/spiky-crest-eagle-stencil-dxf-plate\nhttps://masterdxf.com/animals/big-cat-mascot-head-dxf-vector-for-cnc-router\nhttps://masterdxf.com/animals/songbird-on-bare-branches-frame-dxf-design\nhttps://masterdxf.com/animals/chihuahua-tribal-swirl-hip-dxf-design\n\n#AnimalDXF #FreeDXF #MasterDXF #DXF #LaserCutting #CNC #PlasmaCutting #MetalWallArt #AnimalArt #LaserCutAnimals #PlasmaCutterArt #Woodworking #CNCWallArt #FarmhouseDecor #WolfArt #LaserCutter #HorseHead",
+  "description_tiktok": "Five animals, five new project ideas. Download the free DXF files and start cutting.\n\nmasterdxf.com\n\n#AnimalDXF #FreeDXF #MasterDXF #LaserCutFiles #MetalDesign",
+  "description_instagram": "Five animals, five new project ideas. Download the free DXF files and start cutting.\n\nmasterdxf.com\n\n#AnimalDXF #FreeDXF #MasterDXF #DXF #LaserCutting #CNC #PlasmaCutting #MetalWallArt #AnimalArt #LaserCutAnimals #PlasmaCutterArt #Woodworking #CNCWallArt #FarmhouseDecor #WolfArt #LaserCutter #HorseHead",
+  "composition": "strips"
 }
