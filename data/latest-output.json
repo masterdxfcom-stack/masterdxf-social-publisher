@@ -1,16 +1,16 @@
 {
-  "source_sitemap": "animals",
+  "source_sitemap": "main",
   "images": [
-    "https://masterdxf.com/animals-files/WEBP/A00017.webp",
-    "https://masterdxf.com/animals-files/WEBP/A00072.webp",
-    "https://masterdxf.com/animals-files/WEBP/A00006.webp",
-    "https://masterdxf.com/animals-files/WEBP/A00070.webp",
-    "https://masterdxf.com/animals-files/WEBP/A00060.webp"
+    "https://masterdxf.com/door%20panel/1x/D88.webp",
+    "https://masterdxf.com/double%20doors/WEBP/A43.webp",
+    "https://masterdxf.com/door%20panel/1x/D382.webp",
+    "https://masterdxf.com/door%20panel/1x/D383.webp",
+    "https://masterdxf.com/door%20panel/1x/D138.webp"
   ],
-  "music_url": "https://raw.githubusercontent.com/masterdxfcom-stack/masterdxf-social-publisher/main/music/Love_My_Ride.mp3",
-  "hook_text": "Five animals, five new project ideas. Download the free DXF files and start cutting.",
-  "description_facebook": "Five animals, five new project ideas. Download the free DXF files and start cutting.\n\nhttps://masterdxf.com\nhttps://masterdxf.com/animals/zodiac-ram-spiral-horns-circle-dxf-cut-file\nhttps://masterdxf.com/animals/spiky-crest-eagle-stencil-dxf-plate\nhttps://masterdxf.com/animals/big-cat-mascot-head-dxf-vector-for-cnc-router\nhttps://masterdxf.com/animals/songbird-on-bare-branches-frame-dxf-design\nhttps://masterdxf.com/animals/chihuahua-tribal-swirl-hip-dxf-design\n\n#AnimalDXF #FreeDXF #MasterDXF #DXF #LaserCutting #CNC #PlasmaCutting #MetalWallArt #AnimalArt #LaserCutAnimals #PlasmaCutterArt #Woodworking #CNCWallArt #FarmhouseDecor #WolfArt #LaserCutter #HorseHead",
-  "description_tiktok": "Five animals, five new project ideas. Download the free DXF files and start cutting.\n\nmasterdxf.com\n\n#AnimalDXF #FreeDXF #MasterDXF #LaserCutFiles #MetalDesign",
-  "description_instagram": "Five animals, five new project ideas. Download the free DXF files and start cutting.\n\nmasterdxf.com\n\n#AnimalDXF #FreeDXF #MasterDXF #DXF #LaserCutting #CNC #PlasmaCutting #MetalWallArt #AnimalArt #LaserCutAnimals #PlasmaCutterArt #Woodworking #CNCWallArt #FarmhouseDecor #WolfArt #LaserCutter #HorseHead",
-  "composition": "strips"
+  "music_url": "https://raw.githubusercontent.com/masterdxfcom-stack/masterdxf-social-publisher/main/music/sonican-sport-victory-action-music-30-seconds-457167.mp3",
+  "hook_text": "Keep your workshop moving forward with fresh design ideas. Discover new files and free downloads at MASTERDXF.",
+  "description_facebook": "Keep your workshop moving forward with fresh design ideas. Discover new files and free downloads at MASTERDXF.\n\nhttps://masterdxf.com\nhttps://masterdxf.com/designs/contemporary-islamic-star-grid-minimalist-screen-vector\nhttps://masterdxf.com/designs/teardrop-damask-slat-dxf-panel-for-cnc-gates\nhttps://masterdxf.com/designs/herringbone-chevron-door-panel\nhttps://masterdxf.com/designs/greek-key-diamond-lattice-panel\nhttps://masterdxf.com/designs/classical-sunflower-baroque-scroll-open-lattice-panel\n\n#DXF #CNC #LaserCutting #FreeDXF #MasterDXF #CNCProjects #LaserCutter #DXFFiles #CADDesign #CNCRouter #BuildSomething #WoodworkingTools #CNCDesign #DIY #FreeDesigns #DIYWorkshop #PlasmaCuttingMachine",
+  "description_tiktok": "Keep your workshop moving forward with fresh design ideas. Discover new files and free downloads at MASTERDXF.\n\nmasterdxf.com\n\n#DXF #FreeDXF #MasterDXF #CNCFiles #LaserProjects",
+  "description_instagram": "Keep your workshop moving forward with fresh design ideas. Discover new files and free downloads at MASTERDXF.\n\nmasterdxf.com\n\n#DXF #CNC #LaserCutting #FreeDXF #MasterDXF #CNCProjects #LaserCutter #DXFFiles #CADDesign #CNCRouter #BuildSomething #WoodworkingTools #CNCDesign #DIY #FreeDesigns #DIYWorkshop #PlasmaCuttingMachine",
+  "composition": "collage"
 }
