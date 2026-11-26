@@ -1,16 +1,16 @@
 {
-  "source_sitemap": "main",
+  "source_sitemap": "animals",
   "images": [
-    "https://masterdxf.com/door%20panel/1x/D386.webp",
-    "https://masterdxf.com/door%20panel/1x/W13.webp",
-    "https://masterdxf.com/door%20panel/1x/D311.webp",
-    "https://masterdxf.com/door%20panel/1x/D164.webp",
-    "https://masterdxf.com/door%20panel/1x/D55.webp"
+    "https://masterdxf.com/animals-files/WEBP/A00041.webp",
+    "https://masterdxf.com/animals-files/WEBP/A00037.webp",
+    "https://masterdxf.com/animals-files/WEBP/A00075.webp",
+    "https://masterdxf.com/animals-files/WEBP/A00071.webp",
+    "https://masterdxf.com/animals-files/WEBP/A00001.webp"
   ],
-  "music_url": "https://raw.githubusercontent.com/masterdxfcom-stack/masterdxf-social-publisher/main/music/sonican-city-night-action-30-seconds-462687.mp3",
-  "hook_text": "From decorative patterns to practical metalwork designs, discover new possibilities with MASTERDXF.",
-  "description_facebook": "From decorative patterns to practical metalwork designs, discover new possibilities with MASTERDXF.\n\nhttps://masterdxf.com\nhttps://masterdxf.com/designs/coffee-bean-scatter-panel-dxf\nhttps://masterdxf.com/designs/symmetrical-arabesque-damask-motif-square-lattice-for-cnc-cut\nhttps://masterdxf.com/designs/curling-feather-wave-dxf-pattern-for-coastal-screen-panels\nhttps://masterdxf.com/designs/traditional-sakura-blossom-interconnected-grid-shutter\nhttps://masterdxf.com/designs/abstract-overlapping-geometric-bubbles-circle-gate-template\n\n#DXF #CNC #LaserCutting #FreeDXF #MasterDXF #CNCProjects #LaserCutter #DXFFiles #CADDesign #CNCRouter #SmallWorkshop #CNCHobby #ProductDesign #DesignForManufacturing #LaserHobby #WeldingProjects #CNCMetal",
-  "description_tiktok": "From decorative patterns to practical metalwork designs, discover new possibilities with MASTERDXF.\n\nmasterdxf.com\n\n#DXF #FreeDXF #MasterDXF #DesignForManufacturing #MakerMovement",
-  "description_instagram": "From decorative patterns to practical metalwork designs, discover new possibilities with MASTERDXF.\n\nmasterdxf.com\n\n#DXF #CNC #LaserCutting #FreeDXF #MasterDXF #CNCProjects #LaserCutter #DXFFiles #CADDesign #CNCRouter #SmallWorkshop #CNCHobby #ProductDesign #DesignForManufacturing #LaserHobby #WeldingProjects #CNCMetal",
-  "composition": "tunnel"
+  "music_url": "https://raw.githubusercontent.com/masterdxfcom-stack/masterdxf-social-publisher/main/music/Vibes_Allright.mp3",
+  "hook_text": "Your next cutting project might have fur, feathers, or fins. Check out these 5 free animal DXF files.",
+  "description_facebook": "Your next cutting project might have fur, feathers, or fins. Check out these 5 free animal DXF files.\n\nhttps://masterdxf.com\nhttps://masterdxf.com/animals/low-poly-deer-head-antlers-dxf-for-wall-art\nhttps://masterdxf.com/animals/minimalist-fish-line-art-dxf-for-plasma\nhttps://masterdxf.com/animals/shield-head-owl-stern-brow-dxf-vector\nhttps://masterdxf.com/animals/leaping-dolphin-arc-stencil-free-dxf\nhttps://masterdxf.com/animals/cute-baby-dragon-dxf-svg-cut-file-for-laser-and-cnc\n\n#AnimalDXF #FreeDXF #MasterDXF #DXF #LaserCutting #CNC #PlasmaCutting #MetalWallArt #AnimalArt #LaserCutAnimals #DIYDecor #MetalDesign #LaserCutWallArt #Glowforge #EagleArt #PlasmaArt #DigitalFabrication",
+  "description_tiktok": "Your next cutting project might have fur, feathers, or fins. Check out these 5 free animal DXF files.\n\nmasterdxf.com\n\n#AnimalDXF #FreeDXF #MasterDXF #Stencil #LaserCutDecor",
+  "description_instagram": "Your next cutting project might have fur, feathers, or fins. Check out these 5 free animal DXF files.\n\nmasterdxf.com\n\n#AnimalDXF #FreeDXF #MasterDXF #DXF #LaserCutting #CNC #PlasmaCutting #MetalWallArt #AnimalArt #LaserCutAnimals #DIYDecor #MetalDesign #LaserCutWallArt #Glowforge #EagleArt #PlasmaArt #DigitalFabrication",
+  "composition": "neon"
 }
