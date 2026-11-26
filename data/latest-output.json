@@ -1,16 +1,16 @@
 {
-  "source_sitemap": "animals",
+  "source_sitemap": "main",
   "images": [
-    "https://masterdxf.com/animals-files/WEBP/A00048.webp",
-    "https://masterdxf.com/animals-files/WEBP/A00065.webp",
-    "https://masterdxf.com/animals-files/WEBP/A00082.webp",
-    "https://masterdxf.com/animals-files/WEBP/A00023.webp",
-    "https://masterdxf.com/animals-files/WEBP/A00026.webp"
+    "https://masterdxf.com/door%20panel/1x/D386.webp",
+    "https://masterdxf.com/door%20panel/1x/W13.webp",
+    "https://masterdxf.com/door%20panel/1x/D311.webp",
+    "https://masterdxf.com/door%20panel/1x/D164.webp",
+    "https://masterdxf.com/door%20panel/1x/D55.webp"
   ],
-  "music_url": "https://raw.githubusercontent.com/masterdxfcom-stack/masterdxf-social-publisher/main/music/sonican-nostalgic-acoustic-30-seconds-454844.mp3",
-  "hook_text": "Looking for animal designs to cut? Check out these 5 free DXF files made for laser, CNC, and plasma.",
-  "description_facebook": "Looking for animal designs to cut? Check out these 5 free DXF files made for laser, CNC, and plasma.\n\nhttps://masterdxf.com\nhttps://masterdxf.com/animals/celtic-swirl-cat-round-plate-dxf-stencil\nhttps://masterdxf.com/animals/bald-eagle-head-facing-left-dxf-wall-art\nhttps://masterdxf.com/animals/faceted-bull-head-upward-horns-dxf-file\nhttps://masterdxf.com/animals/geometric-stag-head-antlers-dxf-for-cnc\nhttps://masterdxf.com/animals/t-rex-dinosaur-roaring-free-dxf-svg\n\n#AnimalDXF #FreeDXF #MasterDXF #DXF #LaserCutting #CNC #PlasmaCutting #MetalWallArt #AnimalArt #LaserCutAnimals #Makers #DIYProjects #HorseArt #SteelArt #FarmhouseDecor #CNCDesigns #StencilArt",
-  "description_tiktok": "Looking for animal designs to cut? Check out these 5 free DXF files made for laser, CNC, and plasma.\n\nmasterdxf.com\n\n#AnimalDXF #FreeDXF #MasterDXF #BullHead #AnimalDesigns",
-  "description_instagram": "Looking for animal designs to cut? Check out these 5 free DXF files made for laser, CNC, and plasma.\n\nmasterdxf.com\n\n#AnimalDXF #FreeDXF #MasterDXF #DXF #LaserCutting #CNC #PlasmaCutting #MetalWallArt #AnimalArt #LaserCutAnimals #Makers #DIYProjects #HorseArt #SteelArt #FarmhouseDecor #CNCDesigns #StencilArt",
-  "composition": "countdown"
+  "music_url": "https://raw.githubusercontent.com/masterdxfcom-stack/masterdxf-social-publisher/main/music/sonican-city-night-action-30-seconds-462687.mp3",
+  "hook_text": "From decorative patterns to practical metalwork designs, discover new possibilities with MASTERDXF.",
+  "description_facebook": "From decorative patterns to practical metalwork designs, discover new possibilities with MASTERDXF.\n\nhttps://masterdxf.com\nhttps://masterdxf.com/designs/coffee-bean-scatter-panel-dxf\nhttps://masterdxf.com/designs/symmetrical-arabesque-damask-motif-square-lattice-for-cnc-cut\nhttps://masterdxf.com/designs/curling-feather-wave-dxf-pattern-for-coastal-screen-panels\nhttps://masterdxf.com/designs/traditional-sakura-blossom-interconnected-grid-shutter\nhttps://masterdxf.com/designs/abstract-overlapping-geometric-bubbles-circle-gate-template\n\n#DXF #CNC #LaserCutting #FreeDXF #MasterDXF #CNCProjects #LaserCutter #DXFFiles #CADDesign #CNCRouter #SmallWorkshop #CNCHobby #ProductDesign #DesignForManufacturing #LaserHobby #WeldingProjects #CNCMetal",
+  "description_tiktok": "From decorative patterns to practical metalwork designs, discover new possibilities with MASTERDXF.\n\nmasterdxf.com\n\n#DXF #FreeDXF #MasterDXF #DesignForManufacturing #MakerMovement",
+  "description_instagram": "From decorative patterns to practical metalwork designs, discover new possibilities with MASTERDXF.\n\nmasterdxf.com\n\n#DXF #CNC #LaserCutting #FreeDXF #MasterDXF #CNCProjects #LaserCutter #DXFFiles #CADDesign #CNCRouter #SmallWorkshop #CNCHobby #ProductDesign #DesignForManufacturing #LaserHobby #WeldingProjects #CNCMetal",
+  "composition": "tunnel"
 }
