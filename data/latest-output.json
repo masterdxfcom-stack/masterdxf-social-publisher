@@ -1,16 +1,16 @@
 {
-  "source_sitemap": "animals",
+  "source_sitemap": "main",
   "images": [
-    "https://masterdxf.com/animals-files/WEBP/A00041.webp",
-    "https://masterdxf.com/animals-files/WEBP/A00037.webp",
-    "https://masterdxf.com/animals-files/WEBP/A00075.webp",
-    "https://masterdxf.com/animals-files/WEBP/A00071.webp",
-    "https://masterdxf.com/animals-files/WEBP/A00001.webp"
+    "https://masterdxf.com/double%20doors/WEBP/A3.webp",
+    "https://masterdxf.com/door%20panel/1x/D83.webp",
+    "https://masterdxf.com/door%20panel/1x/D217.webp",
+    "https://masterdxf.com/WALL%20PANEL/PNG/LION.webp",
+    "https://masterdxf.com/double%20doors/WEBP/A26.webp"
   ],
-  "music_url": "https://raw.githubusercontent.com/masterdxfcom-stack/masterdxf-social-publisher/main/music/Vibes_Allright.mp3",
-  "hook_text": "Your next cutting project might have fur, feathers, or fins. Check out these 5 free animal DXF files.",
-  "description_facebook": "Your next cutting project might have fur, feathers, or fins. Check out these 5 free animal DXF files.\n\nhttps://masterdxf.com\nhttps://masterdxf.com/animals/low-poly-deer-head-antlers-dxf-for-wall-art\nhttps://masterdxf.com/animals/minimalist-fish-line-art-dxf-for-plasma\nhttps://masterdxf.com/animals/shield-head-owl-stern-brow-dxf-vector\nhttps://masterdxf.com/animals/leaping-dolphin-arc-stencil-free-dxf\nhttps://masterdxf.com/animals/cute-baby-dragon-dxf-svg-cut-file-for-laser-and-cnc\n\n#AnimalDXF #FreeDXF #MasterDXF #DXF #LaserCutting #CNC #PlasmaCutting #MetalWallArt #AnimalArt #LaserCutAnimals #DIYDecor #MetalDesign #LaserCutWallArt #Glowforge #EagleArt #PlasmaArt #DigitalFabrication",
-  "description_tiktok": "Your next cutting project might have fur, feathers, or fins. Check out these 5 free animal DXF files.\n\nmasterdxf.com\n\n#AnimalDXF #FreeDXF #MasterDXF #Stencil #LaserCutDecor",
-  "description_instagram": "Your next cutting project might have fur, feathers, or fins. Check out these 5 free animal DXF files.\n\nmasterdxf.com\n\n#AnimalDXF #FreeDXF #MasterDXF #DXF #LaserCutting #CNC #PlasmaCutting #MetalWallArt #AnimalArt #LaserCutAnimals #DIYDecor #MetalDesign #LaserCutWallArt #Glowforge #EagleArt #PlasmaArt #DigitalFabrication",
-  "composition": "neon"
+  "music_url": "https://raw.githubusercontent.com/masterdxfcom-stack/masterdxf-social-publisher/main/music/sonican-lifestyle-lounge-30-seconds-575455.mp3",
+  "hook_text": "Great workshops never stop creating. Keep discovering new designs and find fresh inspiration at MASTERDXF.",
+  "description_facebook": "Great workshops never stop creating. Keep discovering new designs and find fresh inspiration at MASTERDXF.\n\nhttps://masterdxf.com\nhttps://masterdxf.com/designs/islamic-star-pattern-courtyard-gate-vector-with-calligraphy-header\nhttps://masterdxf.com/designs/islamic-geometric-star-lattice-privacy-screen-vector-for-cnc\nhttps://masterdxf.com/designs/elongated-star-lattice-dxf-pattern-for-moroccan-style-screens\nhttps://masterdxf.com/designs/lion-king-3d-laser-cut-wall-decor-dxf\nhttps://masterdxf.com/designs/vintage-floral-border-medallion-dxf-slatted-door-panel\n\n#DXF #CNC #LaserCutting #FreeDXF #MasterDXF #CNCProjects #LaserCutter #DXFFiles #CADDesign #CNCRouter #CNCWorkshop #WoodworkingTools #LaserCuttingDIY #LaserCuttingArt #CNCMachining #ProductDesign #LaserProjects",
+  "description_tiktok": "Great workshops never stop creating. Keep discovering new designs and find fresh inspiration at MASTERDXF.\n\nmasterdxf.com\n\n#DXF #FreeDXF #MasterDXF #WoodShop #DIYProjects",
+  "description_instagram": "Great workshops never stop creating. Keep discovering new designs and find fresh inspiration at MASTERDXF.\n\nmasterdxf.com\n\n#DXF #CNC #LaserCutting #FreeDXF #MasterDXF #CNCProjects #LaserCutter #DXFFiles #CADDesign #CNCRouter #CNCWorkshop #WoodworkingTools #LaserCuttingDIY #LaserCuttingArt #CNCMachining #ProductDesign #LaserProjects",
+  "composition": "kaleido"
 }
