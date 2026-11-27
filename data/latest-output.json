@@ -1,16 +1,16 @@
 {
-  "source_sitemap": "main",
+  "source_sitemap": "animals",
   "images": [
-    "https://masterdxf.com/double%20doors/WEBP/A3.webp",
-    "https://masterdxf.com/door%20panel/1x/D83.webp",
-    "https://masterdxf.com/door%20panel/1x/D217.webp",
-    "https://masterdxf.com/WALL%20PANEL/PNG/LION.webp",
-    "https://masterdxf.com/double%20doors/WEBP/A26.webp"
+    "https://masterdxf.com/animals-files/WEBP/A00036.webp",
+    "https://masterdxf.com/animals-files/WEBP/A00050.webp",
+    "https://masterdxf.com/animals-files/WEBP/A00051.webp",
+    "https://masterdxf.com/animals-files/WEBP/A00028.webp",
+    "https://masterdxf.com/animals-files/WEBP/A00035.webp"
   ],
-  "music_url": "https://raw.githubusercontent.com/masterdxfcom-stack/masterdxf-social-publisher/main/music/sonican-lifestyle-lounge-30-seconds-575455.mp3",
-  "hook_text": "Great workshops never stop creating. Keep discovering new designs and find fresh inspiration at MASTERDXF.",
-  "description_facebook": "Great workshops never stop creating. Keep discovering new designs and find fresh inspiration at MASTERDXF.\n\nhttps://masterdxf.com\nhttps://masterdxf.com/designs/islamic-star-pattern-courtyard-gate-vector-with-calligraphy-header\nhttps://masterdxf.com/designs/islamic-geometric-star-lattice-privacy-screen-vector-for-cnc\nhttps://masterdxf.com/designs/elongated-star-lattice-dxf-pattern-for-moroccan-style-screens\nhttps://masterdxf.com/designs/lion-king-3d-laser-cut-wall-decor-dxf\nhttps://masterdxf.com/designs/vintage-floral-border-medallion-dxf-slatted-door-panel\n\n#DXF #CNC #LaserCutting #FreeDXF #MasterDXF #CNCProjects #LaserCutter #DXFFiles #CADDesign #CNCRouter #CNCWorkshop #WoodworkingTools #LaserCuttingDIY #LaserCuttingArt #CNCMachining #ProductDesign #LaserProjects",
-  "description_tiktok": "Great workshops never stop creating. Keep discovering new designs and find fresh inspiration at MASTERDXF.\n\nmasterdxf.com\n\n#DXF #FreeDXF #MasterDXF #WoodShop #DIYProjects",
-  "description_instagram": "Great workshops never stop creating. Keep discovering new designs and find fresh inspiration at MASTERDXF.\n\nmasterdxf.com\n\n#DXF #CNC #LaserCutting #FreeDXF #MasterDXF #CNCProjects #LaserCutter #DXFFiles #CADDesign #CNCRouter #CNCWorkshop #WoodworkingTools #LaserCuttingDIY #LaserCuttingArt #CNCMachining #ProductDesign #LaserProjects",
-  "composition": "kaleido"
+  "music_url": "https://raw.githubusercontent.com/masterdxfcom-stack/masterdxf-social-publisher/main/music/sonican-classical-music-royal-30-seconds-483601.mp3",
+  "hook_text": "Create unique animal wall art with your CNC or laser. These 5 DXF designs are free to download.",
+  "description_facebook": "Create unique animal wall art with your CNC or laser. These 5 DXF designs are free to download.\n\nhttps://masterdxf.com\nhttps://masterdxf.com/animals/five-angelfish-swimming-free-dxf-download\nhttps://masterdxf.com/animals/hummingbird-and-rose-wreath-free-dxf-download\nhttps://masterdxf.com/animals/black-cat-polka-dot-bow-tie-dxf-design\nhttps://masterdxf.com/animals/tribal-leaping-dolphin-dxf-for-metal-wall-art\nhttps://masterdxf.com/animals/dog-head-floppy-ears-stencil-dxf-panel\n\n#AnimalDXF #FreeDXF #MasterDXF #DXF #LaserCutting #CNC #PlasmaCutting #MetalWallArt #AnimalArt #LaserCutAnimals #MetalFabrication #Wildlife #MandalaArt #MetalWallDecor #CelticArt #WoodworkingProjects #Maker",
+  "description_tiktok": "Create unique animal wall art with your CNC or laser. These 5 DXF designs are free to download.\n\nmasterdxf.com\n\n#AnimalDXF #FreeDXF #MasterDXF #FreeDesigns #CatArt",
+  "description_instagram": "Create unique animal wall art with your CNC or laser. These 5 DXF designs are free to download.\n\nmasterdxf.com\n\n#AnimalDXF #FreeDXF #MasterDXF #DXF #LaserCutting #CNC #PlasmaCutting #MetalWallArt #AnimalArt #LaserCutAnimals #MetalFabrication #Wildlife #MandalaArt #MetalWallDecor #CelticArt #WoodworkingProjects #Maker",
+  "composition": "glitch"
 }
