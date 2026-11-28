@@ -1,16 +1,16 @@
 {
-  "source_sitemap": "main",
+  "source_sitemap": "animals",
   "images": [
-    "https://masterdxf.com/double%20doors/WEBP/A56.webp",
-    "https://masterdxf.com/door%20panel/1x/D314.webp",
-    "https://masterdxf.com/door%20panel/1x/D63.webp",
-    "https://masterdxf.com/door%20panel/1x/D241.webp",
-    "https://masterdxf.com/door%20panel/1x/D14.webp"
+    "https://masterdxf.com/animals-files/WEBP/A00030.webp",
+    "https://masterdxf.com/animals-files/WEBP/A00066.webp",
+    "https://masterdxf.com/animals-files/WEBP/A00042.webp",
+    "https://masterdxf.com/animals-files/WEBP/A00069.webp",
+    "https://masterdxf.com/animals-files/WEBP/A00056.webp"
   ],
-  "music_url": "https://raw.githubusercontent.com/masterdxfcom-stack/masterdxf-social-publisher/main/music/sonican-dance-of-joy-30-seconds-346022.mp3",
-  "hook_text": "Every workshop needs fresh ideas. Discover designs for laser cutting, CNC routing, and plasma cutting, all in one place.",
-  "description_facebook": "Every workshop needs fresh ideas. Discover designs for laser cutting, CNC routing, and plasma cutting, all in one place.\n\nhttps://masterdxf.com\nhttps://masterdxf.com/designs/free-vesica-lattice-mesh-dxf-panel-for-laser-cut-screens\nhttps://masterdxf.com/designs/symmetrical-peacock-bloom-dxf-medallion-for-ornamental-gates\nhttps://masterdxf.com/designs/geometric-islamic-octagram-star-lattice-vector-panel-for-cnc\nhttps://masterdxf.com/designs/potted-tree-of-life-dxf-panel-for-symbolic-gate-designs\nhttps://masterdxf.com/designs/swirl-arabesque-scrollwork-dxf-cnc-metal-art\n\n#DXF #CNC #LaserCutting #FreeDXF #MasterDXF #CNCProjects #LaserCutter #DXFFiles #CADDesign #CNCRouter #3DModeling #LaserCuttingProjects #CNCWoodworking #MakerCommunity #CNCMachine #LaserCuttingMachine #MakeSomething",
-  "description_tiktok": "Every workshop needs fresh ideas. Discover designs for laser cutting, CNC routing, and plasma cutting, all in one place.\n\nmasterdxf.com\n\n#DXF #FreeDXF #MasterDXF #CNCArt #MetalDesign",
-  "description_instagram": "Every workshop needs fresh ideas. Discover designs for laser cutting, CNC routing, and plasma cutting, all in one place.\n\nmasterdxf.com\n\n#DXF #CNC #LaserCutting #FreeDXF #MasterDXF #CNCProjects #LaserCutter #DXFFiles #CADDesign #CNCRouter #3DModeling #LaserCuttingProjects #CNCWoodworking #MakerCommunity #CNCMachine #LaserCuttingMachine #MakeSomething",
-  "composition": "classic"
+  "music_url": "https://raw.githubusercontent.com/masterdxfcom-stack/masterdxf-social-publisher/main/music/sonican-hopeful-music-healing-hearts-30-seconds-optimistic-acoustic-425294.mp3",
+  "hook_text": "Ready-to-cut animal silhouettes for your laser or plasma cutter. Download these 5 files free from MasterDXF.",
+  "description_facebook": "Ready-to-cut animal silhouettes for your laser or plasma cutter. Download these 5 files free from MasterDXF.\n\nhttps://masterdxf.com\nhttps://masterdxf.com/animals/eagle-head-tribal-feathers-profile-dxf-file\nhttps://masterdxf.com/animals/triangulated-cougar-head-front-view-dxf-file\nhttps://masterdxf.com/animals/geometric-eagle-swooping-flight-dxf-file\nhttps://masterdxf.com/animals/mother-rabbit-and-baby-bunny-dxf-cut-file\nhttps://masterdxf.com/animals/hummingbird-blossom-stencil-plate-dxf\n\n#AnimalDXF #FreeDXF #MasterDXF #DXF #LaserCutting #CNC #PlasmaCutting #MetalWallArt #AnimalArt #LaserCutAnimals #RusticDecor #FreeFiles #FishingDecor #WallArtDecor #Stencil #MetalWallDecor #SteelArt",
+  "description_tiktok": "Ready-to-cut animal silhouettes for your laser or plasma cutter. Download these 5 files free from MasterDXF.\n\nmasterdxf.com\n\n#AnimalDXF #FreeDXF #MasterDXF #EagleArt #DigitalFabrication",
+  "description_instagram": "Ready-to-cut animal silhouettes for your laser or plasma cutter. Download these 5 files free from MasterDXF.\n\nmasterdxf.com\n\n#AnimalDXF #FreeDXF #MasterDXF #DXF #LaserCutting #CNC #PlasmaCutting #MetalWallArt #AnimalArt #LaserCutAnimals #RusticDecor #FreeFiles #FishingDecor #WallArtDecor #Stencil #MetalWallDecor #SteelArt",
+  "composition": "strips"
 }
