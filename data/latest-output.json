@@ -1,16 +1,16 @@
 {
-  "source_sitemap": "animals",
+  "source_sitemap": "main",
   "images": [
-    "https://masterdxf.com/animals-files/WEBP/A00036.webp",
-    "https://masterdxf.com/animals-files/WEBP/A00050.webp",
-    "https://masterdxf.com/animals-files/WEBP/A00051.webp",
-    "https://masterdxf.com/animals-files/WEBP/A00028.webp",
-    "https://masterdxf.com/animals-files/WEBP/A00035.webp"
+    "https://masterdxf.com/double%20doors/WEBP/A56.webp",
+    "https://masterdxf.com/door%20panel/1x/D314.webp",
+    "https://masterdxf.com/door%20panel/1x/D63.webp",
+    "https://masterdxf.com/door%20panel/1x/D241.webp",
+    "https://masterdxf.com/door%20panel/1x/D14.webp"
   ],
-  "music_url": "https://raw.githubusercontent.com/masterdxfcom-stack/masterdxf-social-publisher/main/music/sonican-classical-music-royal-30-seconds-483601.mp3",
-  "hook_text": "Create unique animal wall art with your CNC or laser. These 5 DXF designs are free to download.",
-  "description_facebook": "Create unique animal wall art with your CNC or laser. These 5 DXF designs are free to download.\n\nhttps://masterdxf.com\nhttps://masterdxf.com/animals/five-angelfish-swimming-free-dxf-download\nhttps://masterdxf.com/animals/hummingbird-and-rose-wreath-free-dxf-download\nhttps://masterdxf.com/animals/black-cat-polka-dot-bow-tie-dxf-design\nhttps://masterdxf.com/animals/tribal-leaping-dolphin-dxf-for-metal-wall-art\nhttps://masterdxf.com/animals/dog-head-floppy-ears-stencil-dxf-panel\n\n#AnimalDXF #FreeDXF #MasterDXF #DXF #LaserCutting #CNC #PlasmaCutting #MetalWallArt #AnimalArt #LaserCutAnimals #MetalFabrication #Wildlife #MandalaArt #MetalWallDecor #CelticArt #WoodworkingProjects #Maker",
-  "description_tiktok": "Create unique animal wall art with your CNC or laser. These 5 DXF designs are free to download.\n\nmasterdxf.com\n\n#AnimalDXF #FreeDXF #MasterDXF #FreeDesigns #CatArt",
-  "description_instagram": "Create unique animal wall art with your CNC or laser. These 5 DXF designs are free to download.\n\nmasterdxf.com\n\n#AnimalDXF #FreeDXF #MasterDXF #DXF #LaserCutting #CNC #PlasmaCutting #MetalWallArt #AnimalArt #LaserCutAnimals #MetalFabrication #Wildlife #MandalaArt #MetalWallDecor #CelticArt #WoodworkingProjects #Maker",
-  "composition": "glitch"
+  "music_url": "https://raw.githubusercontent.com/masterdxfcom-stack/masterdxf-social-publisher/main/music/sonican-dance-of-joy-30-seconds-346022.mp3",
+  "hook_text": "Every workshop needs fresh ideas. Discover designs for laser cutting, CNC routing, and plasma cutting, all in one place.",
+  "description_facebook": "Every workshop needs fresh ideas. Discover designs for laser cutting, CNC routing, and plasma cutting, all in one place.\n\nhttps://masterdxf.com\nhttps://masterdxf.com/designs/free-vesica-lattice-mesh-dxf-panel-for-laser-cut-screens\nhttps://masterdxf.com/designs/symmetrical-peacock-bloom-dxf-medallion-for-ornamental-gates\nhttps://masterdxf.com/designs/geometric-islamic-octagram-star-lattice-vector-panel-for-cnc\nhttps://masterdxf.com/designs/potted-tree-of-life-dxf-panel-for-symbolic-gate-designs\nhttps://masterdxf.com/designs/swirl-arabesque-scrollwork-dxf-cnc-metal-art\n\n#DXF #CNC #LaserCutting #FreeDXF #MasterDXF #CNCProjects #LaserCutter #DXFFiles #CADDesign #CNCRouter #3DModeling #LaserCuttingProjects #CNCWoodworking #MakerCommunity #CNCMachine #LaserCuttingMachine #MakeSomething",
+  "description_tiktok": "Every workshop needs fresh ideas. Discover designs for laser cutting, CNC routing, and plasma cutting, all in one place.\n\nmasterdxf.com\n\n#DXF #FreeDXF #MasterDXF #CNCArt #MetalDesign",
+  "description_instagram": "Every workshop needs fresh ideas. Discover designs for laser cutting, CNC routing, and plasma cutting, all in one place.\n\nmasterdxf.com\n\n#DXF #CNC #LaserCutting #FreeDXF #MasterDXF #CNCProjects #LaserCutter #DXFFiles #CADDesign #CNCRouter #3DModeling #LaserCuttingProjects #CNCWoodworking #MakerCommunity #CNCMachine #LaserCuttingMachine #MakeSomething",
+  "composition": "classic"
 }
